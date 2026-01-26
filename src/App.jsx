@@ -9,6 +9,8 @@ import CardsGrid from "./pages/CardsGrid";
 import CPDashboard from "./cp-dashboard";
 
 
+import Signup from "./pages/Signup";
+
 // GUARD: Protects routes from unauthenticated users
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
@@ -37,6 +39,7 @@ function App() {
             <AuthProvider>
                 <Routes>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
 
                     {/* The new CP Dashboard */}
                     <Route path="/cp-dashboard" element={<CPDashboard />} />

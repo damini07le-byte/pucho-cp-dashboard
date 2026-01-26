@@ -54,6 +54,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const signup = async (email, password, name) => {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                    }
+                }
+            });
+            if (error) throw error;
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
     const logout = async () => {
         setUser(null);
         localStorage.removeItem('dashboard_user_data');
@@ -61,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
