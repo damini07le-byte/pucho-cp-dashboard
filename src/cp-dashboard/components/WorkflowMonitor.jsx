@@ -1,0 +1,72 @@
+import React from 'react';
+import { Zap, Clock, CheckCircle, RefreshCw, AlertCircle, PlayCircle } from 'lucide-react';
+
+const workflows = [
+    { id: 'WF1', name: 'Data Sync (Excel → GSheets)', status: 'Idle', lastRun: '2025-01-01 08:00', frequency: 'Monthly' },
+    { id: 'WF2', name: 'Task Generator', status: 'Completed', lastRun: '2025-01-24 08:00', frequency: 'Daily 8:00 AM' },
+    { id: 'WF3', name: 'Task Scheduler', status: 'Completed', lastRun: '2025-01-24 08:30', frequency: 'Daily 8:30 AM' },
+    { id: 'WF4', name: 'Email Sender', status: 'Running', lastRun: '2025-01-24 09:00', frequency: '9 AM & 5 PM' },
+    { id: 'WF5', name: 'WhatsApp Sender', status: 'Queued', lastRun: '2025-01-24 09:15', frequency: '9 AM & 5 PM' },
+    { id: 'WF6', name: 'Voice Caller', status: 'Scheduled', lastRun: '2025-01-23 17:00', frequency: '9 AM & 5 PM' },
+    { id: 'WF7', name: 'Outcome Processor', status: 'Running', lastRun: 'Continuous', frequency: 'Real-time' },
+    { id: 'WF8', name: 'Follow-up Scheduler', status: 'Idle', lastRun: 'On-demand', frequency: 'As needed' },
+    { id: 'WF9', name: 'DND Manager', status: 'Idle', lastRun: 'On-demand', frequency: 'Real-time' },
+    { id: 'WF10', name: 'Data Quality Reporter', status: 'Scheduled', lastRun: '2025-01-20 08:00', frequency: 'Weekly' },
+];
+
+const StatusBadge = ({ status }) => {
+    const styles = {
+        'Running': 'bg-green-100 text-green-700 border-green-200',
+        'Completed': 'bg-blue-100 text-blue-700 border-blue-200',
+        'Queued': 'bg-amber-100 text-amber-700 border-amber-200',
+        'Scheduled': 'bg-purple-100 text-purple-700 border-purple-200',
+        'Idle': 'bg-gray-100 text-gray-500 border-gray-200',
+        'Failed': 'bg-red-100 text-red-700 border-red-200',
+    };
+
+    return (
+        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${styles[status]}`}>
+            {status.toUpperCase()}
+        </span>
+    );
+};
+
+const WorkflowMonitor = () => {
+    return (
+        <div className="bg-white p-6 rounded-[32px] border border-black/5 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                        <Zap size={20} fill="currentColor" />
+                    </div>
+                    <h2 className="text-lg font-bold">Pucho AI Studio Workflows</h2>
+                </div>
+                <button className="text-xs font-bold text-purple-600 hover:underline flex items-center gap-1">
+                    <RefreshCw size={12} />
+                    Refresh All
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {workflows.map((wf) => (
+                    <div key={wf.id} className="p-4 rounded-2xl bg-gray-50/50 border border-transparent hover:border-purple-100 hover:bg-white hover:shadow-md transition-all group">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-gray-400 group-hover:text-purple-400">{wf.id}</span>
+                            <StatusBadge status={wf.status} />
+                        </div>
+                        <h3 className="text-sm font-bold text-[#111935] mb-1">{wf.name}</h3>
+                        <div className="flex items-center justify-between text-[10px] font-medium text-gray-400">
+                            <div className="flex items-center gap-1">
+                                <Clock size={10} />
+                                {wf.frequency}
+                            </div>
+                            <span>Last: {wf.lastRun}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default WorkflowMonitor;
