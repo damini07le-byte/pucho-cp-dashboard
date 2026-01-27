@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/pucho_logo_sidebar_v2.png';
+import logo from '../../assets/logo.png';
 
 // Custom Icon Imports
 import HomeIcon from '../../assets/icons/home.svg';

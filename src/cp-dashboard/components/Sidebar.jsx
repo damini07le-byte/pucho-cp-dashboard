@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import logo from '../../assets/pucho_logo_sidebar_v2.png';
+import logo from '../../assets/logo.png';
 import HomeIcon from '../../assets/icons/home.svg';
 import AgentsIcon from '../../assets/icons/agents.svg';
 import FlowsIcon from '../../assets/icons/flows.svg';
