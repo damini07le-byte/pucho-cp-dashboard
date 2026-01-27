@@ -29,40 +29,6 @@ const BrandDNADashboard = () => {
     const [brandLibrary, setBrandLibrary] = useState([]);
     const [selectedConcept, setSelectedConcept] = useState(null);
 
-    // Persistence: Load from LocalStorage on Mount
-    useEffect(() => {
-        const savedDNA = localStorage.getItem('pucho_brand_dna');
-        const savedIdeas = localStorage.getItem('pucho_generated_ideas');
-        const savedSelected = localStorage.getItem('pucho_selected_idea');
-        const savedLib = localStorage.getItem('pucho_brand_library');
-        const savedConcept = localStorage.getItem('pucho_selected_concept');
-
-        if (savedDNA) {
-            try { setBrandDNA(JSON.parse(savedDNA)); } catch (e) { console.error("Error parsing saved DNA", e); }
-        }
-        if (savedIdeas) {
-            try { setGeneratedIdeas(JSON.parse(savedIdeas)); } catch (e) { console.error("Error parsing saved Ideas", e); }
-        }
-        if (savedSelected) {
-            try { setSelectedIdea(JSON.parse(savedSelected)); } catch (e) { console.error("Error parsing saved Selected Idea", e); }
-        }
-        if (savedLib) {
-            try { setBrandLibrary(JSON.parse(savedLib)); } catch (e) { console.error("Error parsing saved Lib", e); }
-        }
-        if (savedConcept) {
-            setSelectedConcept(savedConcept);
-        }
-    }, []);
-
-    // Persistence: Save to LocalStorage on Change
-    useEffect(() => {
-        localStorage.setItem('pucho_brand_dna', JSON.stringify(brandDNA));
-        localStorage.setItem('pucho_generated_ideas', JSON.stringify(generatedIdeas));
-        localStorage.setItem('pucho_selected_idea', JSON.stringify(selectedIdea));
-        localStorage.setItem('pucho_brand_library', JSON.stringify(brandLibrary));
-        if (selectedConcept) localStorage.setItem('pucho_selected_concept', selectedConcept);
-    }, [brandDNA, generatedIdeas, selectedIdea, brandLibrary, selectedConcept]);
-
     const saveToLibrary = () => {
         if (!brandDNA.name) return;
         setBrandLibrary(prev => {
