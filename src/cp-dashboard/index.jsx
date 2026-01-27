@@ -7,6 +7,7 @@ import ActivityList from './components/ActivityList';
 import WorkflowMonitor from './components/WorkflowMonitor';
 import TaskQueue from './components/TaskQueue';
 import { OutcomeDistribution, HourlyActivity } from './components/Charts';
+import BrandDNADashboard from './components/BrandDNADashboard';
 
 const CPDashboard = () => {
     const [activeSection, setActiveSection] = useState('Overview');
@@ -54,6 +55,12 @@ const CPDashboard = () => {
                 {activeSection === 'Workflows' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <WorkflowMonitor />
+                    </div>
+                )}
+
+                {activeSection === 'BrandDNA' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <BrandDNADashboard />
                     </div>
                 )}
 

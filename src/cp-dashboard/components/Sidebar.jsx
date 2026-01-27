@@ -12,6 +12,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
     const menuItems = [
         { name: 'Overview', icon: HomeIcon, id: 'Overview' },
         { name: 'Tasks', icon: ActivityIcon, id: 'Tasks' },
+        { name: 'Brand DNA', icon: FlowsIcon, id: 'BrandDNA' },
         { name: 'Customers', icon: AgentsIcon, id: 'Customers' },
         { name: 'Workflows', icon: FlowsIcon, id: 'Workflows' },
         { name: 'Reports', icon: McpIcon, id: 'Reports' },

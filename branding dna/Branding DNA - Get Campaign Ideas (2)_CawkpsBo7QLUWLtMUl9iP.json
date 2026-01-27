@@ -1,0 +1,226 @@
+{
+  "created": "1769493092393",
+  "updated": "1769493092393",
+  "name": "Branding DNA - Get Campaign Ideas (2)",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@puchoaistudio/tool-webhook",
+    "@puchoaistudio/tool-llm-ai",
+    "@puchoaistudio/tool-google-sheets"
+  ],
+  "template": {
+    "displayName": "Branding DNA - Get Campaign Ideas (2)",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "propertySettings": {
+          "authType": {
+            "type": "MANUAL"
+          },
+          "authFields": {
+            "type": "MANUAL",
+            "schema": {}
+          },
+          "liveMarkdown": {
+            "type": "MANUAL"
+          },
+          "syncMarkdown": {
+            "type": "MANUAL"
+          },
+          "testMarkdown": {
+            "type": "MANUAL"
+          }
+        },
+        "pieceName": "@puchoaistudio/tool-webhook",
+        "pieceVersion": "0.1.25",
+        "input": {
+          "authType": "none",
+          "authFields": {}
+        },
+        "sampleData": {},
+        "triggerName": "catch_webhook"
+      },
+      "nextAction": {
+        "name": "step_4",
+        "skip": false,
+        "type": "PIECE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "model": "anthropic/claude-haiku-4.5",
+            "query": "You are an expert creative strategist and campaign idea generator with strong brand understanding, marketing insight, and audience psychology skills.\nINPUTS YOU WILL RECEIVE:\n1. Brand DNA, which will include:\n   - Brand name: {{trigger['body']['brandName']}}\n   - Tagline: {{trigger['body']['brandDNA']['tagline']}}\n   - Official website URL: {{trigger['body']['brandDNA']['url']}}\n   - Short brand description: {{trigger['body']['brandDNA']['shortDescription']}}\n   - Long brand description: {{trigger['body']['brandDNA']['longDescription']}}- values: {{trigger['body']['brandDNA']['values']}}\n-aesthetics: {{trigger['body']['brandDNA']['aesthetics']}}\n-tone: {{trigger['body']['brandDNA']['tone']}} \n2. Campaign Context: {{trigger['body']['campaignContext']}}\n   - Target audience (demographics, psychographics, industry, role, geography, pain points)\n   - Market or industry\n   - Key message or product/service focus\n   - Timeframe or seasonality (if provided)\n   - Constraints or preferences (budget sensitivity, platforms to prioritize or avoid, cultural nuances)\nYOUR TASK:\nUsing the provided Brand DNA and Campaign Context, generate creative, original, and strategically aligned campaign ideas that:\n- Reflect the brand's personality, tone, and positioning\n- Clearly support the campaign objective\n- Are relevant and compelling for the defined target audience\n- Are practical and executable on the suggested channels\n- Avoid generic ideas, clichés, and overused marketing phrases\nCAMPAIGN IDEA REQUIREMENTS:\nYou must generate exactly THREE (3) distinct campaign ideas.\nEach campaign idea must include:\n1. idea_name:\n   - A short, memorable, and creative campaign title\n   - Should be unique and brand-aligned\n   - Maximum 5–6 words\n2. one_liner:\n   - A persuasive and engaging campaign description\n   - Must be between 20 and 25 words (strictly)\n   - Clearly communicate the core idea and value proposition\n   - Written in active voice and aligned with the brand tone\n3. primary_channels:\n   - An array containing 1 or 2 primary marketing channels only\n   - Channels should be the most suitable for executing the idea\n   - Examples: Instagram, YouTube, LinkedIn, Email, Website, WhatsApp, Google Ads, Offline Events\nOUTPUT RULES (VERY IMPORTANT):\n- Output MUST be in valid JSON format only\n- Follow the exact structure provided below\n- Do NOT add explanations, comments, headings, or extra text outside the JSON\n- Do NOT change key names, structure, or nesting\n- Do NOT include markdown formatting or trailing commas\n- Ensure proper JSON syntax (double quotes, arrays, commas)\nOUTPUT FORMAT (STRICT):\n{\n  \"campaign_ideas\": [\n    {\n      \"idea_name\": \"\",\n      \"one_liner\": \"\",\n      \"primary_channels\": [\"\", \"\"]\n    },\n    {\n      \"idea_name\": \"\",\n      \"one_liner\": \"\",\n      \"primary_channels\": [\"\", \"\"]\n    },\n    {\n      \"idea_name\": \"\",\n      \"one_liner\": \"\",\n      \"primary_channels\": [\"\", \"\"]\n    }\n  ]\n}\nQUALITY CHECK BEFORE FINAL OUTPUT:\n- Exactly 3 campaign ideas are present\n- Each one_liner contains 20–25 words\n- primary_channels has only 1 or 2 entries per idea\n- Ideas are meaningfully different from each other\n- JSON is clean, valid, and ready for direct API or workflow consumption",
+            "maxTokens": "1500",
+            "temperature": 0.7
+          },
+          "pieceName": "@puchoaistudio/tool-llm-ai",
+          "actionName": "askLlm",
+          "sampleData": {},
+          "pieceVersion": "0.1.1",
+          "propertySettings": {
+            "model": {
+              "type": "MANUAL"
+            },
+            "query": {
+              "type": "MANUAL"
+            },
+            "maxTokens": {
+              "type": "MANUAL"
+            },
+            "temperature": {
+              "type": "MANUAL"
+            }
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_3",
+          "skip": false,
+          "type": "CODE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "response": "{{step_4['response']}}"
+            },
+            "sampleData": {},
+            "sourceCode": {
+              "code": "export const code = async (inputs) => {\n  let data = inputs.response;\n\n  // 1. Handle String to Object conversion\n  if (typeof data === 'string') {\n    const cleanJson = data.replace(/```json|```/g, '').trim();\n    try {\n      data = JSON.parse(cleanJson);\n    } catch (e) {\n      // In case the structure is slightly different\n      return { error: \"Invalid JSON format\" };\n    }\n  }\n\n  const ideas = data.campaign_ideas || [];\n  \n  // 2. Return the objects directly without the \"Idea X\" text prefix\n  return {\n    idea_1: JSON.stringify(ideas[0] || {}),\n    idea_2: JSON.stringify(ideas[1] || {}),\n    idea_3: JSON.stringify(ideas[2] || {})\n  };\n};",
+              "packageJson": "{}"
+            },
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_1",
+            "skip": false,
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['JlNkAUDbEcBI04Cu0ziHs']}}",
+                "values": {
+                  "A": "{{trigger['body']['requestId']}}",
+                  "B": "{{trigger['body']['brandDNA']['url']}}",
+                  "C": "{{trigger['body']['brandDNA']['name']}}",
+                  "D": "{{step_3['idea_1']}}",
+                  "E": "{{step_3['idea_2']}}",
+                  "F": "{{step_3['idea_3']}}"
+                },
+                "sheetId": "{{trigger['body']['spreadsheet_config']['campaign_ideas_id']}}",
+                "as_string": false,
+                "spreadsheetId": "{{trigger['body']['spreadsheet_config']['spreadsheet_id']}}",
+                "first_row_headers": true,
+                "includeTeamDrives": false
+              },
+              "pieceName": "@puchoaistudio/tool-google-sheets",
+              "actionName": "insert_row",
+              "sampleData": {},
+              "pieceVersion": "0.14.0",
+              "propertySettings": {
+                "auth": {
+                  "type": "MANUAL"
+                },
+                "values": {
+                  "type": "MANUAL",
+                  "schema": {
+                    "A": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Log id",
+                      "displayName": "Log id",
+                      "defaultValue": ""
+                    },
+                    "B": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Brand URL",
+                      "displayName": "Brand URL",
+                      "defaultValue": ""
+                    },
+                    "C": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Brand Name",
+                      "displayName": "Brand Name",
+                      "defaultValue": ""
+                    },
+                    "D": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Idea 1",
+                      "displayName": "Idea 1",
+                      "defaultValue": ""
+                    },
+                    "E": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Idea 2",
+                      "displayName": "Idea 2",
+                      "defaultValue": ""
+                    },
+                    "F": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "description": "Idea 3",
+                      "displayName": "Idea 3",
+                      "defaultValue": ""
+                    }
+                  }
+                },
+                "sheetId": {
+                  "type": "DYNAMIC"
+                },
+                "as_string": {
+                  "type": "MANUAL"
+                },
+                "spreadsheetId": {
+                  "type": "DYNAMIC"
+                },
+                "first_row_headers": {
+                  "type": "MANUAL"
+                },
+                "includeTeamDrives": {
+                  "type": "MANUAL"
+                }
+              },
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "displayName": "Insert Row"
+          },
+          "displayName": "Code"
+        },
+        "displayName": "Ask LLM"
+      }
+    },
+    "valid": true,
+    "agentIds": [],
+    "connectionIds": [
+      "JlNkAUDbEcBI04Cu0ziHs"
+    ],
+    "schemaVersion": "7"
+  },
+  "blogUrl": ""
+}
