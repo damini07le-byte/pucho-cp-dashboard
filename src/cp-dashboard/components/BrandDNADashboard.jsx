@@ -12,24 +12,20 @@ const BrandDNADashboard = () => {
     const [activeTab, setActiveTab] = useState('ideas');
 
     const [brandDNA, setBrandDNA] = useState({
-        name: 'NeonFlux',
-        tagline: 'Future of Streetwear',
-        url: 'https://neonflux.example.com',
-        logo: 'https://cdn-icons-png.flaticon.com/512/2504/2504936.png',
-        shortDescription: 'Cyberpunk urban fashion for the digital age.',
+        name: '',
+        tagline: '',
+        url: '',
+        logo: '',
+        shortDescription: '',
         longDescription: '',
-        values: 'Bold, Futuristic, Rebellious',
-        aesthetics: 'Neon, Glitch, Dark Mode',
-        tone: 'Edgy',
-        campaignContext: 'Launch of the Cyber-Sneaker V2'
+        values: '',
+        aesthetics: '',
+        tone: '',
+        campaignContext: ''
     });
 
     const [generatedIdeas, setGeneratedIdeas] = useState([]);
-    const [selectedIdea, setSelectedIdea] = useState({
-        idea_name: "The Glitch Drop",
-        one_liner: "A limited edition sneaker drop revealed through augmented reality street art markers.",
-        primary_channels: ["Instagram", "TikTok"]
-    });
+    const [selectedIdea, setSelectedIdea] = useState(null);
     const [brandLibrary, setBrandLibrary] = useState([]);
     const [selectedConcept, setSelectedConcept] = useState(null);
 
