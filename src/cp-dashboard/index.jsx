@@ -172,6 +172,12 @@ const CPDashboard = () => {
                     </div>
                 )}
 
+                {activeSection === 'Workflows' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <WorkflowMonitor />
+                    </div>
+                )}
+
                 {activeSection === 'Reports' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <OutcomeDistribution tasks={tasks} />
@@ -194,6 +200,12 @@ const CPDashboard = () => {
                 {activeSection === 'Dues' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <PendingDues />
+                    </div>
+                )}
+
+                {activeSection === 'BrandDNA' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <BrandDNADashboard />
                     </div>
                 )}
             </main>
