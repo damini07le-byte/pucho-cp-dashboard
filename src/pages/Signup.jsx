@@ -9,7 +9,7 @@ import mascot1 from '../assets/mascot_1.png';
 import mascot3 from '../assets/mascot_3.png';
 import mascot4 from '../assets/mascot_4.png';
 import mascot5 from '../assets/mascot_5.png';
-import logo from '../assets/pucho_logo_login.png';
+import logo from '../assets/logo.png';
 
 const Mascot = ({ imageSrc, delay, x, y, size = "w-16 h-16", cursorColor = "text-blue-500", cursorRotation = "0deg" }) => (
     <div

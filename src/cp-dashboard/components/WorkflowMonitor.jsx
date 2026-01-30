@@ -25,13 +25,28 @@ const StatusBadge = ({ status }) => {
     };
 
     return (
-        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${styles[status]}`}>
+        <span className={`px-4 py-1.5 rounded-full text-[12px] font-black border ${styles[status]}`}>
             {status.toUpperCase()}
         </span>
     );
 };
 
 const WorkflowMonitor = () => {
+    const [wfStates, setWfStates] = React.useState(workflows);
+
+    const handleRunWf = (id) => {
+        setWfStates(prev => prev.map(wf =>
+            wf.id === id ? { ...wf, status: 'Running' } : wf
+        ));
+
+        // Simulate completion after 5 seconds
+        setTimeout(() => {
+            setWfStates(prev => prev.map(wf =>
+                wf.id === id ? { ...wf, status: 'Completed', lastRun: 'Just now' } : wf
+            ));
+        }, 5000);
+    };
+
     return (
         <div className="bg-white p-6 rounded-[32px] border border-black/5 shadow-sm">
             <div className="flex items-center justify-between mb-6">
@@ -41,27 +56,43 @@ const WorkflowMonitor = () => {
                     </div>
                     <h2 className="text-lg font-bold">Pucho AI Studio Workflows</h2>
                 </div>
-                <button className="text-xs font-bold text-purple-600 hover:underline flex items-center gap-1">
-                    <RefreshCw size={12} />
-                    Refresh All
+                <button
+                    onClick={() => setWfStates(workflows)}
+                    className="text-sm font-black text-purple-600 hover:underline flex items-center gap-2"
+                >
+                    <RefreshCw size={14} />
+                    Reset All
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {workflows.map((wf) => (
-                    <div key={wf.id} className="p-4 rounded-2xl bg-gray-50/50 border border-transparent hover:border-purple-100 hover:bg-white hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black text-gray-400 group-hover:text-purple-400">{wf.id}</span>
-                            <StatusBadge status={wf.status} />
+                {wfStates.map((wf) => (
+                    <div key={wf.id} className="p-6 rounded-[28px] bg-gray-50/50 border border-transparent hover:border-purple-200 hover:bg-white hover:shadow-lg transition-all group relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-[12px] font-black text-gray-300 group-hover:text-purple-400">{wf.id}</span>
+                            <div className="flex items-center gap-3">
+                                <StatusBadge status={wf.status} />
+                                {wf.status !== 'Running' && (
+                                    <button
+                                        onClick={() => handleRunWf(wf.id)}
+                                        className="p-2 rounded-full hover:bg-purple-50 text-gray-300 hover:text-purple-600 transition-colors"
+                                    >
+                                        <PlayCircle size={18} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                        <h3 className="text-sm font-bold text-[#111935] mb-1">{wf.name}</h3>
-                        <div className="flex items-center justify-between text-[10px] font-medium text-gray-400">
-                            <div className="flex items-center gap-1">
-                                <Clock size={10} />
+                        <h3 className="text-[15px] font-black text-[#111935] mb-2">{wf.name}</h3>
+                        <div className="flex items-center justify-between text-[12px] font-bold text-gray-400">
+                            <div className="flex items-center gap-2">
+                                <Clock size={12} />
                                 {wf.frequency}
                             </div>
                             <span>Last: {wf.lastRun}</span>
                         </div>
+                        {wf.status === 'Running' && (
+                            <div className="absolute bottom-0 left-0 h-1 bg-purple-600 animate-[loading_5s_linear_infinite]" style={{ width: '100%' }}></div>
+                        )}
                     </div>
                 ))}
             </div>
