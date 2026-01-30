@@ -448,25 +448,46 @@ const IdeaStrategyView = ({
 
                         {/* Library & Test Controls */}
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => {
-                                    setBrandDNA({
-                                        name: 'LuxeBrew Coffee',
-                                        tagline: 'Elevating Every Drop',
-                                        url: 'https://luxebrew.coffee',
-                                        logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
-                                        shortDescription: 'A premium coffee roastery sourcing the finest beans globally.',
-                                        longDescription: 'LuxeBrew is more than just coffee; it\'s a sensory experience. We specialize in ethically sourced, small-batch roasted beans delivered fresh to your door.',
-                                        values: 'Quality, Sustainability, Community',
-                                        aesthetics: 'Minimalist, Dark Mode, Gold Accents',
-                                        tone: 'Sophisticated, Warm, Bold',
-                                        campaignContext: 'Busy urban professionals in Mumbai looking for a premium morning ritual.'
-                                    });
-                                }}
-                                className="text-[10px] bg-purple-50 hover:bg-purple-100 border-none rounded-lg px-3 py-2 text-pucho-purple font-bold transition-all"
-                            >
-                                Fill Test Data
-                            </button>
+                            <div className="flex bg-purple-50 rounded-lg p-0.5 border border-purple-100">
+                                <button
+                                    onClick={() => {
+                                        setBrandDNA({
+                                            name: 'LuxeBrew Coffee',
+                                            tagline: 'Elevating Every Drop',
+                                            url: 'https://luxebrew.coffee',
+                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
+                                            shortDescription: 'A premium coffee roastery sourcing the finest beans globally.',
+                                            longDescription: 'LuxeBrew is more than just coffee; it\'s a sensory experience. We specialize in ethically sourced, small-batch roasted beans delivered fresh to your door.',
+                                            values: 'Quality, Sustainability, Community',
+                                            aesthetics: 'Minimalist, Dark Mode, Gold Accents',
+                                            tone: 'Sophisticated, Warm, Bold',
+                                            campaignContext: 'Busy urban professionals in Mumbai looking for a premium morning ritual.'
+                                        });
+                                    }}
+                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
+                                >
+                                    LuxeBrew
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setBrandDNA({
+                                            name: 'FitFuel Smoothies',
+                                            tagline: 'Power Your Potential',
+                                            url: 'https://fitfuel.in',
+                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
+                                            shortDescription: 'Fresh, protein-packed smoothies for the fitness-conscious.',
+                                            longDescription: 'FitFuel provides ready-to-drink meal replacement smoothies made with organic fruits and premium whey. Designed for post-workout recovery and healthy living.',
+                                            values: 'Health, Energy, Vitality',
+                                            aesthetics: 'Vibrant, Clean, Energizing',
+                                            tone: 'Motivating, Fresh, Energetic',
+                                            campaignContext: 'Gym-goers and athletes in Bangalore needing a quick protein fix post-workout.'
+                                        });
+                                    }}
+                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
+                                >
+                                    FitFuel
+                                </button>
+                            </div>
                             {brandLibrary.length > 0 && (
                                 <select
                                     className="text-[10px] bg-gray-50 border-none rounded-lg px-3 py-2 text-gray-500 font-bold focus:ring-1 focus:ring-[#A0D296] cursor-pointer"
