@@ -487,6 +487,25 @@ const IdeaStrategyView = ({
                                 >
                                     FitFuel
                                 </button>
+                                <button
+                                    onClick={() => {
+                                        setBrandDNA({
+                                            name: 'GlowSkin Organics',
+                                            tagline: 'Radiance from Within',
+                                            url: 'https://glowskin.in',
+                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
+                                            shortDescription: '100% organic, cruelty-free skincare for sensitive skin.',
+                                            longDescription: 'GlowSkin Organics combines ancient Ayurvedic principles with modern dermatology. Our products are handcrafted in small batches using premium cold-pressed oils.',
+                                            values: 'Pure, Ethical, Transparent',
+                                            aesthetics: 'Pastel, Soft, Airy',
+                                            tone: 'Gentle, Trustworthy, Inspiring',
+                                            campaignContext: 'Eco-conscious women aged 25-45 looking for sustainable beauty solutions.'
+                                        });
+                                    }}
+                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
+                                >
+                                    GlowSkin
+                                </button>
                             </div>
                             {brandLibrary.length > 0 && (
                                 <select
