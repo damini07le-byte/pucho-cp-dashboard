@@ -20,9 +20,9 @@ const CPDashboard = () => {
     const [isSyncing, setIsSyncing] = useState(false);
     const [isCampaignRunning, setIsCampaignRunning] = useState(false);
 
-    // Default URLs
-    const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/edit?gid=0#gid=0';
-    const TASK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/edit?gid=113319197#gid=113319197';
+    // Default URLs (Published CSVs for Netlify compatibility)
+    const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=0&single=true&output=csv';
+    const TASK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=113319197&single=true&output=csv';
 
     const [sheetUrl, setSheetUrl] = useState(localStorage.getItem('pucho_sheet_url') || TASK_SHEET_URL);
     const [searchTerm, setSearchTerm] = useState('');
