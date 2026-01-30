@@ -76,23 +76,39 @@ const BrandDNADashboard = () => {
         const images = [];
         const seen = new Set();
 
+        // Regex to find potential image URLs in any string
+        const urlRegex = /(https?:\/\/[^\s"'<>]+?\.(?:jpeg|jpg|gif|png|webp|svg)(?:\?[^\s"'<>]*)?|data:image\/[a-z]+;base64,[^\s"'<>]+|https?:\/\/pucho\.ai\/[^\s"'<>]+|https?:\/\/[^\s"'<>]*googleusercontent[^\s"'<>]*|https?:\/\/[^\s"'<>]*firebasestorage[^\s"'<>]*)/gi;
+
         const findImg = (obj) => {
             if (!obj) return;
 
             if (typeof obj === 'string') {
                 const cleanStr = obj.trim();
-                // Match standard URLs, data URIs, and Pucho Studio specific image patterns
-                if ((cleanStr.startsWith('http') || cleanStr.startsWith('data:image')) &&
+
+                // 1. Check if the string itself is a URL (Permissive)
+                const isLikelyUrl = (cleanStr.startsWith('http') || cleanStr.startsWith('data:image')) &&
                     (cleanStr.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) ||
                         cleanStr.includes('googleusercontent') ||
                         cleanStr.includes('pucho') ||
                         cleanStr.includes('blob:') ||
                         cleanStr.includes('firebasestorage') ||
-                        cleanStr.includes('s3.amazonaws.com'))) {
+                        cleanStr.includes('s3.amazonaws.com'));
 
+                if (isLikelyUrl) {
                     if (!seen.has(cleanStr)) {
                         images.push(cleanStr);
                         seen.add(cleanStr);
+                        return;
+                    }
+                }
+
+                // 2. Search for URLs INSIDE the string (Regex)
+                let match;
+                while ((match = urlRegex.exec(cleanStr)) !== null) {
+                    const foundUrl = match[0];
+                    if (!seen.has(foundUrl)) {
+                        images.push(foundUrl);
+                        seen.add(foundUrl);
                     }
                 }
             } else if (Array.isArray(obj)) {
@@ -103,8 +119,8 @@ const BrandDNADashboard = () => {
         };
 
         findImg(data);
-        console.log("📸 [IMAGE EXTRACTOR] Found:", images.length, "images");
-        return images.slice(0, 6); // Allow more variant previews
+        console.log("📸 [IMAGE EXTRACTOR] Total Unique Images Found:", images.length);
+        return images;
     };
 
 
@@ -891,8 +907,25 @@ const ConceptLabView = ({ brandDNA, selectedIdea, onDownload, extractImages, onL
                     )}
 
                     {status === 'error' && (
-                        <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-2xl text-[10px] font-bold flex items-center gap-2 border border-red-100">
-                            <AlertCircle size={14} /> {errorMsg}
+                        <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-2xl text-[10px] font-bold flex flex-col gap-2 border border-red-100">
+                            <div className="flex items-center gap-2">
+                                <AlertCircle size={14} /> {errorMsg}
+                            </div>
+                            {debugData && (
+                                <div className="mt-2 bg-gray-900 p-3 rounded-xl overflow-auto max-h-40 text-pucho-green font-mono">
+                                    <pre>{JSON.stringify(debugData, null, 2)}</pre>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {status === 'success' && visuals.length === 0 && (
+                        <div className="mt-4 p-4 bg-amber-50 text-amber-700 rounded-2xl text-[10px] font-bold border border-amber-100">
+                            <p className="flex items-center gap-2 mb-2"><AlertCircle size={14} /> Pucho Studio responded but no images were found.</p>
+                            <div className="bg-gray-900 p-3 rounded-xl overflow-auto max-h-40 text-amber-400 font-mono">
+                                <span className="text-[8px] text-gray-500 uppercase block mb-1">Raw Response Body</span>
+                                <pre>{JSON.stringify(debugData, null, 2)}</pre>
+                            </div>
                         </div>
                     )}
                 </div>
