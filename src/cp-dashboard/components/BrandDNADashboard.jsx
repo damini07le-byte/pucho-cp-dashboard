@@ -74,15 +74,37 @@ const BrandDNADashboard = () => {
     const extractImages = (data) => {
         if (!data) return [];
         const images = [];
+        const seen = new Set();
+
         const findImg = (obj) => {
-            if (typeof obj === 'string' && (obj.startsWith('http') || obj.startsWith('data:image')) && (obj.match(/\.(jpeg|jpg|gif|png|webp)/i) || obj.includes('googleusercontent') || obj.includes('pucho'))) {
-                images.push(obj);
-            } else if (typeof obj === 'object' && obj !== null) {
+            if (!obj) return;
+
+            if (typeof obj === 'string') {
+                const cleanStr = obj.trim();
+                // Match standard URLs, data URIs, and Pucho Studio specific image patterns
+                if ((cleanStr.startsWith('http') || cleanStr.startsWith('data:image')) &&
+                    (cleanStr.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) ||
+                        cleanStr.includes('googleusercontent') ||
+                        cleanStr.includes('pucho') ||
+                        cleanStr.includes('blob:') ||
+                        cleanStr.includes('firebasestorage') ||
+                        cleanStr.includes('s3.amazonaws.com'))) {
+
+                    if (!seen.has(cleanStr)) {
+                        images.push(cleanStr);
+                        seen.add(cleanStr);
+                    }
+                }
+            } else if (Array.isArray(obj)) {
+                obj.forEach(findImg);
+            } else if (typeof obj === 'object') {
                 Object.values(obj).forEach(findImg);
             }
         };
+
         findImg(data);
-        return images.slice(0, 3);
+        console.log("📸 [IMAGE EXTRACTOR] Found:", images.length, "images");
+        return images.slice(0, 6); // Allow more variant previews
     };
 
 
@@ -225,14 +247,19 @@ const IdeaStrategyView = ({
 
                 let data;
                 try {
+                    // Try direct parse first
                     data = JSON.parse(rawText);
                 } catch (e) {
                     console.warn("⚠️ [IDEA STRATEGY] Direct JSON parse failed, scavenging for blocks...");
-                    const jsonMatch = rawText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+                    // Scavenge for anything that looks like JSON array or object
+                    const jsonMatch = rawText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
                     if (jsonMatch) {
                         try {
-                            data = JSON.parse(jsonMatch[0].replace(/```json|```/g, '').trim());
+                            const cleanJson = jsonMatch[0].replace(/```json|```/g, '').trim();
+                            data = JSON.parse(cleanJson);
+                            console.log("✅ [IDEA STRATEGY] Scavenged JSON successfully");
                         } catch (innerE) {
+                            console.error("❌ [IDEA STRATEGY] Scavenge failed:", innerE);
                             data = { body: rawText };
                         }
                     } else {
@@ -245,9 +272,15 @@ const IdeaStrategyView = ({
                 // --- Super Robust Parsing Logic ---
                 let parsedData = data;
 
-                // Studio often wraps the response in fields.body or just body
-                // We want to find the actual JSON or Array
-                const possiblePaths = [data.fields?.body, data.body, data];
+                // Studio often wraps the response in fields.body, data, or just body
+                const possiblePaths = [
+                    data.fields?.body,
+                    data.data,
+                    data.body,
+                    data.output,
+                    data.result,
+                    data
+                ];
 
                 for (const path of possiblePaths) {
                     if (!path) continue;
@@ -257,18 +290,19 @@ const IdeaStrategyView = ({
                         try {
                             const cleanJson = path.replace(/```json|```/g, '').trim();
                             parsedData = JSON.parse(cleanJson);
-                            break; // Found it
+                            console.log("🎯 [IDEA STRATEGY] Found valid JSON in path");
+                            break;
                         } catch (e) { }
                     }
 
                     // If it's an array of objects, this is usually our ideas list
-                    if (Array.isArray(path) && path.length > 0 && typeof path[0] === 'object') {
+                    if (Array.isArray(path) && path.length > 0) {
                         parsedData = path;
                         break;
                     }
 
                     // If it's an object with keys we want, use it
-                    if (typeof path === 'object' && path !== null && (path.campaign_ideas || path.idea_1)) {
+                    if (typeof path === 'object' && path !== null && (path.campaign_ideas || path.idea_1 || path.ideas)) {
                         parsedData = path;
                         break;
                     }
@@ -412,9 +446,28 @@ const IdeaStrategyView = ({
                             </div>
                         </div>
 
-                        {/* Library Selector */}
-                        {brandLibrary.length > 0 && (
-                            <div className="flex items-center gap-2">
+                        {/* Library & Test Controls */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    setBrandDNA({
+                                        name: 'LuxeBrew Coffee',
+                                        tagline: 'Elevating Every Drop',
+                                        url: 'https://luxebrew.coffee',
+                                        logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
+                                        shortDescription: 'A premium coffee roastery sourcing the finest beans globally.',
+                                        longDescription: 'LuxeBrew is more than just coffee; it\'s a sensory experience. We specialize in ethically sourced, small-batch roasted beans delivered fresh to your door.',
+                                        values: 'Quality, Sustainability, Community',
+                                        aesthetics: 'Minimalist, Dark Mode, Gold Accents',
+                                        tone: 'Sophisticated, Warm, Bold',
+                                        campaignContext: 'Busy urban professionals in Mumbai looking for a premium morning ritual.'
+                                    });
+                                }}
+                                className="text-[10px] bg-purple-50 hover:bg-purple-100 border-none rounded-lg px-3 py-2 text-pucho-purple font-bold transition-all"
+                            >
+                                Fill Test Data
+                            </button>
+                            {brandLibrary.length > 0 && (
                                 <select
                                     className="text-[10px] bg-gray-50 border-none rounded-lg px-3 py-2 text-gray-500 font-bold focus:ring-1 focus:ring-[#A0D296] cursor-pointer"
                                     onChange={(e) => {
@@ -426,8 +479,8 @@ const IdeaStrategyView = ({
                                     <option value="">Load Profile...</option>
                                     {brandLibrary.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
                                 </select>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
                     <div className="space-y-8">
@@ -667,18 +720,47 @@ const ConceptLabView = ({ brandDNA, selectedIdea, onDownload, extractImages, onL
             clearTimeout(id);
 
             if (response.ok) {
-                const data = await response.json();
+                const rawText = await response.text();
+                console.log("📥 [CONCEPT LAB] Raw Text Received:", rawText);
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    const jsonMatch = rawText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+                    if (jsonMatch) {
+                        try {
+                            data = JSON.parse(jsonMatch[0].replace(/```json|```/g, '').trim());
+                        } catch (innerE) {
+                            data = { body: rawText };
+                        }
+                    } else {
+                        data = { body: rawText };
+                    }
+                }
+
                 setDebugData(data);
                 setStatus('success');
                 const imgs = extractImages(data);
+                console.log("✨ [CONCEPT LAB] Extracted Images:", imgs);
                 if (imgs.length > 0) setActiveImage(imgs[0]);
+                else {
+                    console.warn("⚠️ [CONCEPT LAB] No images found in response");
+                    if (rawText.length > 50) {
+                        // If no images but we got text, maybe it's an error message or different format
+                        setErrorMsg("Sync response received but no image URLs found. Check Studio flow output.");
+                    }
+                }
             } else {
+                const errText = await response.text();
+                console.error("❌ [CONCEPT LAB] Request failed:", response.status, errText);
                 setStatus('error');
                 setErrorMsg(`Server Error: ${response.status}`);
             }
         } catch (e) {
+            console.error("⛔ [CONCEPT LAB] Fetch Error:", e);
             setStatus('error');
-            setErrorMsg(e.name === 'AbortError' ? "Request Timed Out (4 mins)." : (e.message || "Network Error"));
+            setErrorMsg(e.name === 'AbortError' ? "Request Timed Out (4 mins). Pucho Studio did not respond in time." : (e.message || "Network Error"));
         }
     };
 
@@ -893,16 +975,42 @@ const CreativeStudioView = ({ brandDNA, selectedIdea, onDownload, extractImages,
             clearTimeout(id);
 
             if (response.ok) {
-                const data = await response.json();
+                const rawText = await response.text();
+                console.log("📥 [CREATIVE STUDIO] Raw Text Received:", rawText);
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    const jsonMatch = rawText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+                    if (jsonMatch) {
+                        try {
+                            data = JSON.parse(jsonMatch[0].replace(/```json|```/g, '').trim());
+                        } catch (innerE) {
+                            data = { body: rawText };
+                        }
+                    } else {
+                        data = { body: rawText };
+                    }
+                }
+
                 setDebugData(data);
                 setStatus('success');
                 const imgs = extractImages(data);
+                console.log("✨ [CREATIVE STUDIO] Extracted Images:", imgs);
                 if (imgs.length > 0) setActiveImage(imgs[0]);
+                else {
+                    console.warn("⚠️ [CREATIVE STUDIO] No images found in response");
+                    setErrorMsg("Studio finished but no high-quality image URL was found in the response.");
+                }
             } else {
+                const errText = await response.text();
+                console.error("❌ [CREATIVE STUDIO] Request failed:", response.status, errText);
                 setStatus('error');
                 setErrorMsg(`Server Error: ${response.status}`);
             }
         } catch (e) {
+            console.error("⛔ [CREATIVE STUDIO] Fetch Error:", e);
             setStatus('error');
             setErrorMsg(e.name === 'AbortError' ? "Timeout (4 mins)." : (e.message || "Network Error"));
         }
