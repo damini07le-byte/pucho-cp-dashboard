@@ -1,5 +1,6 @@
 import React from 'react';
 import { Zap, Clock, CheckCircle, RefreshCw, AlertCircle, PlayCircle } from 'lucide-react';
+import { triggerAgentFlow } from '../utils/agentService';
 
 const workflows = [
     { id: 'WF1', name: 'Data Sync (Excel → GSheets)', status: 'Idle', lastRun: '2025-01-01 08:00', frequency: 'Monthly' },
@@ -12,6 +13,9 @@ const workflows = [
     { id: 'WF8', name: 'Follow-up Scheduler', status: 'Idle', lastRun: 'On-demand', frequency: 'As needed' },
     { id: 'WF9', name: 'DND Manager', status: 'Idle', lastRun: 'On-demand', frequency: 'Real-time' },
     { id: 'WF10', name: 'Data Quality Reporter', status: 'Scheduled', lastRun: '2025-01-20 08:00', frequency: 'Weekly' },
+    { id: 'AG5-1', name: 'Agent 5: Morning Plan', status: 'Scheduled', lastRun: 'Today 08:00', frequency: 'Daily 8:00 AM' },
+    { id: 'AG5-2', name: 'Agent 5: Barcode Tracking', status: 'Running', lastRun: 'Real-time', frequency: 'Continuous' },
+    { id: 'AG5-3', name: 'Agent 5: Delay Alerts', status: 'Idle', lastRun: 'Never', frequency: 'Every 4 Hours' },
 ];
 
 const StatusBadge = ({ status }) => {
@@ -33,11 +37,15 @@ const StatusBadge = ({ status }) => {
 
 const WorkflowMonitor = () => {
     const [wfStates, setWfStates] = React.useState(workflows);
-
     const handleRunWf = (id) => {
         setWfStates(prev => prev.map(wf =>
             wf.id === id ? { ...wf, status: 'Running' } : wf
         ));
+
+        // Call Agent Service for AG5 workflows
+        if (id.startsWith('AG5')) {
+            triggerAgentFlow('AG5', id);
+        }
 
         // Simulate completion after 5 seconds
         setTimeout(() => {

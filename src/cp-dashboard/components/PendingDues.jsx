@@ -61,7 +61,7 @@ const PendingDues = () => {
                                     <td className="py-5 text-sm">
                                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${due.priority === 'Critical' ? 'bg-red-50 text-red-600' :
                                             due.priority === 'High' ? 'bg-amber-50 text-amber-600' :
-                                                'bg-[#a0d296]/20 text-[#5a8052]'
+                                                'bg-blue-50 text-blue-600'
                                             }`}>
                                             {due.priority}
                                         </span>

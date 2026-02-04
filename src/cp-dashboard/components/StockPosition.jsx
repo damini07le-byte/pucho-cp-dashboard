@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchStockData } from '../utils/dataService';
+import { triggerAgentFlow } from '../utils/agentService';
 
 const StockPosition = () => {
     const [stockItems, setStockItems] = useState([]);
@@ -36,7 +37,7 @@ const StockPosition = () => {
                     <div key={i} className="bg-white p-8 rounded-[32px] border border-black/5 shadow-sm hover:shadow-md transition-shadow">
                         <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{stat.label}</p>
                         <h3 className="text-3xl font-bold text-[#111935]">{stat.value}</h3>
-                        <p className={`text-xs mt-2 font-bold ${stat.trend.includes('+') ? 'text-[#5a8052]' : 'text-gray-500'}`}>{stat.trend}</p>
+                        <p className={`text-xs mt-2 font-bold ${stat.trend.includes('+') ? 'text-blue-600' : 'text-gray-500'}`}>{stat.trend}</p>
                     </div>
                 ))}
             </div>
@@ -51,7 +52,7 @@ const StockPosition = () => {
                                 placeholder="Search products..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-[#a0d296]"
+                                className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-blue-400"
                             />
                         </div>
                     </div>
@@ -85,6 +86,7 @@ const StockPosition = () => {
                                     <th className="pb-4 font-bold text-sm text-gray-400 uppercase tracking-wider">Quantity</th>
                                     <th className="pb-4 font-bold text-sm text-gray-400 uppercase tracking-wider">Value</th>
                                     <th className="pb-4 font-bold text-sm text-gray-400 uppercase tracking-wider">Status</th>
+                                    <th className="pb-4 font-bold text-sm text-gray-400 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -96,12 +98,22 @@ const StockPosition = () => {
                                         <td className="py-4 text-sm font-bold">{item.quantity}</td>
                                         <td className="py-4 text-sm text-gray-600">{item.value}</td>
                                         <td className="py-4 text-sm">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${item.status === 'In Stock' ? 'bg-[#a0d296]/20 text-[#5a8052]' :
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${item.status === 'In Stock' ? 'bg-blue-50 text-blue-600' :
                                                 item.status === 'Low Stock' ? 'bg-amber-50 text-amber-600' :
                                                     'bg-red-50 text-red-600'
                                                 }`}>
                                                 {item.status}
                                             </span>
+                                        </td>
+                                        <td className="py-4 text-right px-1">
+                                            {item.status !== 'In Stock' && (
+                                                <button
+                                                    onClick={() => triggerAgentFlow('AG5', 'StockAlert', { item: item.name })}
+                                                    className="px-4 py-1.5 bg-[#2563EB] text-white text-[10px] font-black rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+                                                >
+                                                    NOTIFY AGENT 5
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

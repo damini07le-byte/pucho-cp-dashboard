@@ -54,9 +54,9 @@ const DailyLedger = () => {
                         placeholder="Search transactions..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-[#a0d296] w-full md:w-64 font-medium"
+                        className="px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-blue-400 w-full md:w-64 font-medium"
                     />
-                    <button className="px-6 py-3 rounded-2xl bg-[#a0d296]/10 text-[#5a8052] font-bold text-sm hover:bg-[#a0d296]/20 transition-all">Download PDF</button>
+                    <button className="px-6 py-3 rounded-2xl bg-blue-50 text-blue-600 font-bold text-sm hover:bg-blue-100 transition-all">Download PDF</button>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="px-6 py-3 rounded-2xl bg-black text-white font-bold text-sm hover:scale-105 transition-all"
@@ -78,7 +78,7 @@ const DailyLedger = () => {
                                 <input
                                     required
                                     type="text"
-                                    className="w-full px-5 py-3 bg-gray-50 border border-black/5 rounded-2xl text-sm font-bold outline-none focus:border-[#a0d296]"
+                                    className="w-full px-5 py-3 bg-gray-50 border border-black/5 rounded-2xl text-sm font-bold outline-none focus:border-blue-400"
                                     value={newEntry.party}
                                     onChange={e => setNewEntry({ ...newEntry, party: e.target.value })}
                                     placeholder="e.g. Acme Corp"
@@ -114,7 +114,7 @@ const DailyLedger = () => {
                                 <input
                                     required
                                     type="text"
-                                    className="w-full px-5 py-3 bg-gray-50 border border-black/5 rounded-2xl text-sm font-bold outline-none focus:border-[#a0d296]"
+                                    className="w-full px-5 py-3 bg-gray-50 border border-black/5 rounded-2xl text-sm font-bold outline-none focus:border-blue-400"
                                     value={newEntry.amount}
                                     onChange={e => setNewEntry({ ...newEntry, amount: e.target.value })}
                                     placeholder="e.g. 15000"
@@ -166,7 +166,7 @@ const DailyLedger = () => {
                                     <td className="py-4 text-sm font-bold">{trx.party}</td>
                                     <td className="py-4 text-sm text-gray-600">{trx.account}</td>
                                     <td className="py-4 text-sm">
-                                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${trx.type === 'Credit' ? 'bg-[#a0d296]/20 text-[#5a8052]' : 'bg-red-50 text-red-600'
+                                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${trx.type === 'Credit' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'
                                             }`}>
                                             {trx.type}
                                         </span>
@@ -174,7 +174,7 @@ const DailyLedger = () => {
                                     <td className="py-4 text-sm font-bold">{trx.amount}</td>
                                     <td className="py-4 text-sm">
                                         <div className="flex items-center gap-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${trx.status === 'Settled' ? 'bg-[#a0d296]' : 'bg-amber-400'}`} />
+                                            <div className={`w-1.5 h-1.5 rounded-full ${trx.status === 'Settled' ? 'bg-blue-500' : 'bg-amber-400'}`} />
                                             {trx.status}
                                         </div>
                                     </td>

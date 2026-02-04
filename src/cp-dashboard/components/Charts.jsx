@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const outcomeBreakdown = [
-    { name: 'Agreed...', value: 234, color: '#10B981' },
+    { name: 'Agreed...', value: 234, color: '#3B82F6' },
     { name: 'Call La...', value: 156, color: '#F59E0B' },
     { name: 'Not Inte...', value: 89, color: '#EF4444' },
     { name: 'DND Re...', value: 34, color: '#6B7280' },
@@ -32,8 +32,8 @@ export const OutcomeDistribution = ({ tasks }) => {
     }, {});
 
     const dynamicOutcomeBreakdown = [
-        { name: 'Completed', value: counts['Completed'] || 0, color: '#10B981' },
-        { name: 'In Progress', value: counts['In Progress'] || 0, color: '#3B82F6' },
+        { name: 'Completed', value: counts['Completed'] || 0, color: '#3B82F6' },
+        { name: 'In Progress', value: counts['In Progress'] || 0, color: '#60A5FA' },
         { name: 'Pending', value: counts['Pending'] || 0, color: '#F59E0B' },
         { name: 'Failed', value: counts['Failed'] || 0, color: '#EF4444' },
     ];

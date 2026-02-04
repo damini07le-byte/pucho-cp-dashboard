@@ -12,22 +12,22 @@ const ActivityList = ({ tasks }) => {
         { label: 'Emails Sent', value: emailCount, icon: Mail, color: 'bg-blue-50 text-blue-500' },
         { label: 'WhatsApp Messages', value: whatsappCount, icon: MessageCircle, color: 'bg-green-50 text-green-500' },
         { label: 'Voice Calls', value: voiceCount, icon: Phone, color: 'bg-purple-50 text-purple-500' },
-        { label: 'Successful Connects', value: successCount, icon: ThumbsUp, color: 'bg-[#A0D296]/10 text-[#A0D296]' },
+        { label: 'Successful Connects', value: successCount, icon: ThumbsUp, color: 'bg-blue-50 text-blue-500' },
     ];
 
     return (
         <div className="bg-white p-6 rounded-[32px] border border-black/5 shadow-sm h-full">
             <div className="flex items-center justify-between mb-8">
                 <h2 className="text-xl font-bold">Today's Activity</h2>
-                <div className="flex items-center gap-2 text-green-500 font-bold text-[12px]">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <div className="flex items-center gap-2 text-blue-500 font-bold text-[12px]">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                     LIVE
                 </div>
             </div>
 
             <div className="space-y-3">
                 {dynamicActivity.map((activity, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-transparent hover:border-[#A0D296]/30 hover:bg-white hover:shadow-md transition-all">
+                    <div key={idx} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-transparent hover:border-blue-400/30 hover:bg-white hover:shadow-md transition-all">
                         <div className="flex items-center gap-4">
                             <div className={`w-11 h-11 rounded-xl ${activity.color} flex items-center justify-center`}>
                                 <activity.icon size={22} />

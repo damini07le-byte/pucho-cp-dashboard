@@ -24,9 +24,9 @@ const Header = ({ onSync, isSyncing, initialUrl, onSearch, onMenuToggle }) => {
                 <div className="flex items-center gap-2">
                     <h1 className="text-2xl font-bold text-[#111935] whitespace-nowrap">Dashboard Overview</h1>
                     {initialUrl && (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 border border-green-100 rounded-full animate-pulse">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                            <span className="text-[10px] font-bold text-green-600 uppercase tracking-tighter whitespace-nowrap">Live</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full animate-pulse">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter whitespace-nowrap">Live</span>
                         </div>
                     )}
                 </div>
@@ -56,7 +56,7 @@ const Header = ({ onSync, isSyncing, initialUrl, onSearch, onMenuToggle }) => {
                     className={`flex items-center h-[48px] bg-white rounded-full border transition-all duration-300 ${isSearchFocused ? 'border-purple-400 shadow-lg flex-1 max-w-[400px]' : 'border-black/5 w-[200px] xl:w-[320px]'
                         }`}
                 >
-                    <div className="flex items-center justify-center w-8 h-8 ml-1 bg-[#A0D296]/10 rounded-full shrink-0">
+                    <div className="flex items-center justify-center w-8 h-8 ml-1 bg-blue-50 rounded-full shrink-0">
                         <img src={SearchIcon} alt=" search" className="w-4 h-4 opacity-70" />
                     </div>
                     <input

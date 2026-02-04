@@ -112,11 +112,11 @@ const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
                                 if (window.innerWidth < 1024) onClose();
                             }}
                             className={`w-full flex items-center gap-[12px] px-[16px] h-[48px] rounded-[24px] text-[15px] font-semibold transition-all border ${activeSection === item.id
-                                ? 'bg-[#A0D296]/10 border-transparent text-[#5a8052]'
+                                ? 'bg-blue-50 border-transparent text-blue-600'
                                 : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
                                 }`}
                         >
-                            <div className={`transition-colors flex-shrink-0 ${activeSection === item.id ? 'text-[#5a8052]' : 'text-gray-400'}`}>
+                            <div className={`transition-colors flex-shrink-0 ${activeSection === item.id ? 'text-blue-600' : 'text-gray-400'}`}>
                                 {item.customIcon ? (
                                     item.customIcon
                                 ) : (

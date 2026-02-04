@@ -17,10 +17,10 @@ const StatCards = ({ tasks }) => {
     ).length;
 
     const dynamicStats = [
-        { label: 'Total Customers', value: totalCustomers, change: 5.2, icon: Users, accentColor: 'bg-[#A0D296]/10', iconColor: 'text-[#A0D296]' },
+        { label: 'Total Customers', value: totalCustomers, change: 5.2, icon: Users, accentColor: 'bg-blue-50', iconColor: 'text-blue-500' },
         { label: 'Expiring This Month', value: expiringThisMonth, change: null, icon: AlertTriangle, accentColor: 'bg-amber-50', iconColor: 'text-amber-500' },
         { label: 'Tasks Pending', value: pendingTasks, change: null, icon: Clock, accentColor: 'bg-blue-50', iconColor: 'text-blue-500' },
-        { label: 'Completed Today', value: completedTasks, change: 12.5, icon: CheckCircle, accentColor: 'bg-[#A0D296]/10', iconColor: 'text-[#A0D296]' },
+        { label: 'Completed Today', value: completedTasks, change: 12.5, icon: CheckCircle, accentColor: 'bg-blue-50', iconColor: 'text-blue-500' },
         { label: 'DND List', value: dndList, change: null, icon: PhoneOff, accentColor: 'bg-gray-50', iconColor: 'text-gray-400' },
     ];
 
@@ -33,7 +33,7 @@ const StatCards = ({ tasks }) => {
                             <stat.icon size={24} />
                         </div>
                         {stat.change && (
-                            <span className="text-xs font-black text-green-500 px-3 py-1 bg-green-50 rounded-full">
+                            <span className="text-xs font-black text-blue-500 px-3 py-1 bg-blue-50 rounded-full">
                                 {stat.change > 0 ? `+${stat.change}%` : `${stat.change}%`}
                             </span>
                         )}

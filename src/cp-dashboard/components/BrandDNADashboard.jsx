@@ -127,7 +127,7 @@ const BrandDNADashboard = () => {
     const tabs = [
         { id: 'ideas', label: 'Idea Strategy', icon: Lightbulb, color: 'text-amber-500', bg: 'bg-amber-50' },
         { id: 'lab', label: 'Concept Lab', icon: Palette, color: 'text-pucho-purple', bg: 'bg-purple-50' },
-        { id: 'studio', label: 'Creative Studio', icon: ImageIcon, color: 'text-pucho-green', bg: 'bg-green-50' },
+        { id: 'studio', label: 'Creative Studio', icon: ImageIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
     ];
 
     return (
@@ -464,65 +464,7 @@ const IdeaStrategyView = ({
 
                         {/* Library & Test Controls */}
                         <div className="flex items-center gap-2">
-                            <div className="flex bg-purple-50 rounded-lg p-0.5 border border-purple-100">
-                                <button
-                                    onClick={() => {
-                                        setBrandDNA({
-                                            name: 'LuxeBrew Coffee',
-                                            tagline: 'Elevating Every Drop',
-                                            url: 'https://luxebrew.coffee',
-                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
-                                            shortDescription: 'A premium coffee roastery sourcing the finest beans globally.',
-                                            longDescription: 'LuxeBrew is more than just coffee; it\'s a sensory experience. We specialize in ethically sourced, small-batch roasted beans delivered fresh to your door.',
-                                            values: 'Quality, Sustainability, Community',
-                                            aesthetics: 'Minimalist, Dark Mode, Gold Accents',
-                                            tone: 'Sophisticated, Warm, Bold',
-                                            campaignContext: 'Busy urban professionals in Mumbai looking for a premium morning ritual.'
-                                        });
-                                    }}
-                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
-                                >
-                                    LuxeBrew
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setBrandDNA({
-                                            name: 'FitFuel Smoothies',
-                                            tagline: 'Power Your Potential',
-                                            url: 'https://fitfuel.in',
-                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
-                                            shortDescription: 'Fresh, protein-packed smoothies for the fitness-conscious.',
-                                            longDescription: 'FitFuel provides ready-to-drink meal replacement smoothies made with organic fruits and premium whey. Designed for post-workout recovery and healthy living.',
-                                            values: 'Health, Energy, Vitality',
-                                            aesthetics: 'Vibrant, Clean, Energizing',
-                                            tone: 'Motivating, Fresh, Energetic',
-                                            campaignContext: 'Gym-goers and athletes in Bangalore needing a quick protein fix post-workout.'
-                                        });
-                                    }}
-                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
-                                >
-                                    FitFuel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setBrandDNA({
-                                            name: 'GlowSkin Organics',
-                                            tagline: 'Radiance from Within',
-                                            url: 'https://glowskin.in',
-                                            logo: 'https://pucho.ai/wp-content/uploads/2023/12/logo-pucho-blue.png',
-                                            shortDescription: '100% organic, cruelty-free skincare for sensitive skin.',
-                                            longDescription: 'GlowSkin Organics combines ancient Ayurvedic principles with modern dermatology. Our products are handcrafted in small batches using premium cold-pressed oils.',
-                                            values: 'Pure, Ethical, Transparent',
-                                            aesthetics: 'Pastel, Soft, Airy',
-                                            tone: 'Gentle, Trustworthy, Inspiring',
-                                            campaignContext: 'Eco-conscious women aged 25-45 looking for sustainable beauty solutions.'
-                                        });
-                                    }}
-                                    className="text-[10px] hover:bg-white px-3 py-1.5 text-pucho-purple font-bold rounded-md transition-all"
-                                >
-                                    GlowSkin
-                                </button>
-                            </div>
+
                             {brandLibrary.length > 0 && (
                                 <select
                                     className="text-[10px] bg-gray-50 border-none rounded-lg px-3 py-2 text-gray-500 font-bold focus:ring-1 focus:ring-[#A0D296] cursor-pointer"
@@ -549,17 +491,17 @@ const IdeaStrategyView = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Brand Name</label>
-                                    <input name="name" value={brandDNA.name} onChange={handleChange} type="text" placeholder="e.g. LuxeBrew" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all" />
+                                    <input name="name" value={brandDNA.name} onChange={handleChange} type="text" placeholder="e.g. LuxeBrew" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Official Website</label>
-                                    <input name="url" value={brandDNA.url} onChange={handleChange} type="text" placeholder="https://example.com" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all" />
+                                    <input name="url" value={brandDNA.url} onChange={handleChange} type="text" placeholder="https://example.com" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Tagline</label>
-                                    <input name="tagline" value={brandDNA.tagline} onChange={handleChange} type="text" placeholder="Your brand catchphrase" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all" />
+                                    <input name="tagline" value={brandDNA.tagline} onChange={handleChange} type="text" placeholder="Your brand catchphrase" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center ml-1">
@@ -570,7 +512,7 @@ const IdeaStrategyView = ({
                                             <input type="file" className="hidden" accept="image/*" onChange={onLogoUpload} />
                                         </label>
                                     </div>
-                                    <input name="logo" value={brandDNA.logo} onChange={handleChange} type="text" placeholder="https://example.com/logo.png" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all" />
+                                    <input name="logo" value={brandDNA.logo} onChange={handleChange} type="text" placeholder="https://example.com/logo.png" className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all" />
                                 </div>
                             </div>
                         </div>
@@ -584,15 +526,15 @@ const IdeaStrategyView = ({
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Values</label>
-                                    <input name="values" value={brandDNA.values} onChange={handleChange} type="text" placeholder="e.g. Quality, Eco-friendly" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all text-sm" />
+                                    <input name="values" value={brandDNA.values} onChange={handleChange} type="text" placeholder="e.g. Quality, Eco-friendly" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all text-sm" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Aesthetics</label>
-                                    <input name="aesthetics" value={brandDNA.aesthetics} onChange={handleChange} type="text" placeholder="e.g. Minimal, Pastel" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all text-sm" />
+                                    <input name="aesthetics" value={brandDNA.aesthetics} onChange={handleChange} type="text" placeholder="e.g. Minimal, Pastel" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all text-sm" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Tone</label>
-                                    <input name="tone" value={brandDNA.tone} onChange={handleChange} type="text" placeholder="e.g. Playful, Bold" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all text-sm" />
+                                    <input name="tone" value={brandDNA.tone} onChange={handleChange} type="text" placeholder="e.g. Playful, Bold" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all text-sm" />
                                 </div>
                             </div>
                         </div>
@@ -606,11 +548,11 @@ const IdeaStrategyView = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Short Description</label>
-                                    <textarea name="shortDescription" value={brandDNA.shortDescription} onChange={handleChange} rows="2" placeholder="Brief elevator pitch..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all resize-none text-sm"></textarea>
+                                    <textarea name="shortDescription" value={brandDNA.shortDescription} onChange={handleChange} rows="2" placeholder="Brief elevator pitch..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all resize-none text-sm"></textarea>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 ml-1">Long Description</label>
-                                    <textarea name="longDescription" value={brandDNA.longDescription} onChange={handleChange} rows="2" placeholder="Tell the full story..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all resize-none text-sm"></textarea>
+                                    <textarea name="longDescription" value={brandDNA.longDescription} onChange={handleChange} rows="2" placeholder="Tell the full story..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all resize-none text-sm"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -628,7 +570,7 @@ const IdeaStrategyView = ({
                                     onChange={handleChange}
                                     rows="3"
                                     placeholder="Who is this campaign for? (e.g. Busy moms in Bangalore needing quick meals)"
-                                    className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-[#A0D296] transition-all resize-none font-medium"
+                                    className="w-full px-4 py-3 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-400 transition-all resize-none font-medium"
                                 ></textarea>
                             </div>
                         </div>
@@ -646,7 +588,7 @@ const IdeaStrategyView = ({
 
                             <button
                                 onClick={saveToLibrary}
-                                className="px-6 py-4 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 hover:text-[#A0D296] hover:border-[#A0D296] transition-all group"
+                                className="px-6 py-4 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-all group"
                                 title="Save Brand DNA to Library"
                             >
                                 <Upload size={20} className="group-hover:scale-110 transition-transform" />
@@ -672,7 +614,7 @@ const IdeaStrategyView = ({
                                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Raw Studio Response</span>
                                             <button onClick={() => setDebugData(null)} className="text-gray-500 hover:text-white text-[10px]">Clear</button>
                                         </div>
-                                        <pre className="text-[10px] text-pucho-green font-mono overflow-auto max-h-40 whitespace-pre-wrap">
+                                        <pre className="text-[10px] text-blue-400 font-mono overflow-auto max-h-40 whitespace-pre-wrap">
                                             {JSON.stringify(debugData, null, 2)}
                                         </pre>
                                     </div>
@@ -696,7 +638,7 @@ const IdeaStrategyView = ({
                                         key={idx}
                                         onClick={() => setSelectedIdea(idea)}
                                         className={`p-5 rounded-2xl cursor-pointer transition-all border ${selectedIdea?.idea_name === idea.idea_name
-                                            ? 'bg-[#A0D296] border-[#A0D296] text-black shadow-lg scale-[1.02]'
+                                            ? 'bg-blue-500 border-blue-500 text-white shadow-lg scale-[1.02]'
                                             : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                                             }`}
                                     >
@@ -726,7 +668,7 @@ const IdeaStrategyView = ({
                             )}
                         </div>
                     </div>
-                    <div className="absolute top-[-10%] right-[-10%] w-40 h-40 bg-[#A0D296]/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
+                    <div className="absolute top-[-10%] right-[-10%] w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
                 </div>
             </div>
         </div>
@@ -1194,7 +1136,7 @@ const CreativeStudioView = ({ brandDNA, selectedIdea, onDownload, extractImages,
                                 <>
                                     <img src={activeImage} className="w-full h-full object-contain p-8 animate-in zoom-in-95 duration-500" alt="" />
                                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex justify-between items-end">
-                                        <span className="px-2 py-0.5 bg-pucho-green text-[10px] font-black uppercase rounded text-black tracking-widest">Final HQ</span>
+                                        <span className="px-2 py-0.5 bg-blue-500 text-[10px] font-black uppercase rounded text-white tracking-widest">Final HQ</span>
                                         <button
                                             onClick={() => onDownload(activeImage, `hq-creative-${Date.now()}.png`)}
                                             className="w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20"
