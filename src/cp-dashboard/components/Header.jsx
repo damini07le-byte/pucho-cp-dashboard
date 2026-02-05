@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Activity, Menu } from 'lucide-react';
 import SearchIcon from '../../assets/icons/search.svg';
 import BellIcon from '../../assets/icons/bell.png';
+import Favicon from '../../assets/favicon.png';
 
 const Header = ({ onSync, isSyncing, initialUrl, onSearch, onMenuToggle }) => {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -21,7 +22,8 @@ const Header = ({ onSync, isSyncing, initialUrl, onSearch, onMenuToggle }) => {
                 >
                     <Menu className="w-6 h-6" />
                 </button>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                    <img src={Favicon} alt="Pucho" className="w-8 h-8 rounded-full shadow-sm" />
                     <h1 className="text-2xl font-bold text-[#111935] whitespace-nowrap">Dashboard Overview</h1>
                     {initialUrl && (
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full animate-pulse">
