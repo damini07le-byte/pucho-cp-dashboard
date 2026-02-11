@@ -10,6 +10,76 @@ import { useSheetData } from '../hooks/useSheetData';
 const PendingDues = () => {
     const { data, loading, error, lastUpdated, refetch } = useSheetData(30000);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [manualLoading, setManualLoading] = useState(null); // 'call', 'whatsapp', 'email'
+
+    const handleManualAction = async (actionType, customer) => {
+        setManualLoading(actionType);
+        const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz';
+
+        // Get the absolute latest data from the sheet sync state
+        const latestInfo = data.find(row => row['Customer ID'] === customer['Customer ID']) || customer;
+
+        // Function to calculate overdue status dynamically
+        const getOverdueStatus = (dateStr) => {
+            if (!dateStr || dateStr === 'N/A') return 'N/A';
+            try {
+                const [d, m, y] = dateStr.split('-').map(Number);
+                const due = new Date(y, m - 1, d);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const diff = Math.round((due - today) / 86400000);
+
+                if (diff === 0) return "Due Today";
+                if (diff < 0) return `${Math.abs(diff)} Days Overdue`;
+                return `${diff} Days Remaining`;
+            } catch (e) {
+                return dateStr;
+            }
+        };
+
+        const payload = {
+            action_type: actionType,
+            customer_data: {
+                id: latestInfo['Customer ID'],
+                row_number: data.findIndex(row => row['Customer ID'] === latestInfo['Customer ID']) + 2, // Excel/Sheet index
+                name: latestInfo['Customer Name'],
+                amount: latestInfo['Amount'],
+                due_date: latestInfo['Due Date'], // Raw date from sheet
+                overdue: getOverdueStatus(latestInfo['Due Date']),
+                mobile: latestInfo['Mobile'],
+                email: latestInfo['Email'],
+                priority: latestInfo['Priority'] || 'High',
+                // Detailed data from latest sync
+                emailOutcome: latestInfo['T-10 Mail'] || 'N/A',
+                whatsappOutcome: latestInfo['T-15 WA'] || 'N/A',
+                callOutcome: latestInfo['Overdue AI Call'] || 'N/A',
+                followUp: `Manual ${actionType} triggered from Hub Dashboard`,
+                actionType: actionType,
+                triggeredAt: new Date().toISOString()
+            },
+            source: "CP_Dashboard",
+            triggered_at: new Date().toISOString()
+        };
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert(`SUCCESS! Manual ${actionType.toUpperCase()} triggered for ${latestInfo['Customer Name']}.`);
+            } else {
+                alert(`Error: Hub was unable to trigger ${actionType}.`);
+            }
+        } catch (err) {
+            console.error('Webhook Error:', err);
+            alert('Connection Error: Unable to reach recovery server.');
+        } finally {
+            setManualLoading(null);
+        }
+    };
 
     const parseLog = (logString) => {
         if (!logString || logString === 'NA' || logString === 'Pending' || logString.includes('#REF!')) return null;
@@ -83,7 +153,13 @@ const PendingDues = () => {
                 t10: parseLog(row['T-10 Mail']),
                 t5: parseLog(row['T-5 Combo']),
                 t0: parseLog(row['T-0 Urgent']),
-                call: parseLog(row['Overdue AI Call'])
+                call: parseLog(row['Overdue AI Call']),
+                // Manual intervention logs
+                manual: {
+                    call: parseLog(row['Manual Call']),
+                    wa: parseLog(row['Manual WA']),
+                    email: parseLog(row['Manual Email'])
+                }
             }
         };
     }).filter(customer => customer['Payment Status'] !== 'Paid');
@@ -242,6 +318,81 @@ const PendingDues = () => {
 
                             {/* Modal Content - Smaller font/spacing */}
                             <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8 bg-[#fafafa]">
+                                {/* Manual Actions Section */}
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-black text-[#1e293b] flex items-center gap-2 uppercase tracking-tighter">
+                                        <ArrowUpRight size={16} className="text-blue-500" />
+                                        Manual Interventions
+                                    </h4>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <button
+                                            onClick={() => handleManualAction('call', selectedCustomer)}
+                                            disabled={manualLoading}
+                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-red-200 hover:bg-red-50/30 transition-all group"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-all shadow-sm">
+                                                {manualLoading === 'call' ? <RefreshCw size={18} className="animate-spin" /> : <PhoneCall size={18} />}
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Voice Call</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleManualAction('whatsapp', selectedCustomer)}
+                                            disabled={manualLoading}
+                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-green-200 hover:bg-green-50/30 transition-all group"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-all shadow-sm">
+                                                {manualLoading === 'whatsapp' ? <RefreshCw size={18} className="animate-spin" /> : <MessageSquare size={18} />}
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">WhatsApp</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleManualAction('email', selectedCustomer)}
+                                            disabled={manualLoading}
+                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm">
+                                                {manualLoading === 'email' ? <RefreshCw size={18} className="animate-spin" /> : <Mail size={18} />}
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Send Email</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Manual Log Stages (Dynamic Layout: 1, 2, or 3 logs) */}
+                                {(() => {
+                                    const activeLogs = [
+                                        { id: 'call', title: 'Manual call', data: selectedCustomer.logs.manual.call, icon: <PhoneCall size={14} className="text-red-500" />, medium: 'Admin Voice Call', color: 'red' },
+                                        { id: 'wa', title: 'Manual WhatsApp', data: selectedCustomer.logs.manual.wa, icon: <MessageSquare size={14} className="text-green-500" />, medium: 'Admin Message', color: 'green' },
+                                        { id: 'email', title: 'Manual Email', data: selectedCustomer.logs.manual.email, icon: <Mail size={14} className="text-indigo-500" />, medium: 'Admin Outreach', color: 'indigo' }
+                                    ].filter(l => l.data);
+
+                                    if (activeLogs.length === 0) return null;
+
+                                    return (
+                                        <div className="space-y-4">
+                                            <h4 className="text-[10px] font-black text-blue-600 flex items-center gap-2 uppercase tracking-widest">
+                                                <History size={14} />
+                                                Manual Intervention History ({activeLogs.length})
+                                            </h4>
+                                            <div className={`grid gap-4 ${activeLogs.length === 1 ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+                                                {activeLogs.map((logItem, idx) => (
+                                                    <CompactStage
+                                                        key={logItem.id}
+                                                        title={logItem.title}
+                                                        log={logItem.data}
+                                                        icon={logItem.icon}
+                                                        medium={logItem.medium}
+                                                        color={logItem.color}
+                                                        fullWidth={activeLogs.length === 3 && idx === 2} // Third item takes full width
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
                                 <div className="space-y-6">
                                     <h4 className="text-sm font-black text-[#1e293b] flex items-center gap-2 uppercase tracking-tighter">
                                         <ShieldCheck size={16} className="text-blue-500" />
@@ -267,7 +418,7 @@ const PendingDues = () => {
                                             />
                                         </div>
 
-                                        {/* Row 2: T-5 Combo (Full Width with Side-by-Side Content) */}
+                                        {/* Row 2: T-5 Combo */}
                                         <CompactStage
                                             title="T-5 Critical Follow-up"
                                             log={selectedCustomer.logs.t5}
@@ -277,7 +428,7 @@ const PendingDues = () => {
                                             fullWidth={true}
                                         />
 
-                                        {/* Row 3: T-0 Final Notice (Full Width) */}
+                                        {/* Row 3: T-0 Final Notice */}
                                         <CompactStage
                                             title="T-0 Final Notice"
                                             log={selectedCustomer.logs.t0}
@@ -287,6 +438,7 @@ const PendingDues = () => {
                                             fullWidth={true}
                                         />
                                     </div>
+
 
                                     <div className="space-y-4">
                                         {/* Transcript - More Compact */}
