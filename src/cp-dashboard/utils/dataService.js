@@ -41,32 +41,34 @@ export const convertToCsvUrl = (url) => {
  * Robust Mapping for different Sheet headers
  */
 const HEADER_MAPPING = {
-    id: ['id', 'no', 's.no', 'sr no', 'serial number', 'sno', 'number', 'sl no'],
+    id: ['task_id', 'serial number', 'id', 'no', 's.no', 'sr no', 'licence index'],
     customer: ['org name', 'organization', 'customer', 'client', 'customer name', 'name', 'company', 'brand', 'party'],
-    product: ['product', 'item', 'service', 'product name', 'project', 'plan'],
+    product: ['product', 'item', 'service', 'product name', 'project', 'plan', 'licence type'],
     mobile: ['mobile', 'phone', 'contact', 'mobile number', 'number', 'phone number', 'tel', 'whatsapp', 'mobile_no'],
-    email: ['email', 'email id', 'email_id', 'mail', 'email address'],
+    email: ['email id', 'email_id', 'email', 'mail', 'email address'],
     contact: ['contact person', 'contact_person', 'person', 'representative', 'owner', 'manager'],
-    status: ['status', 'state', 'condition', 'progress', 'outcome'],
-    time: ['scheduled_date', 'time', 'date', 'last update', 'last_update', 'timestamp', 'updated at', 'slot', 'time_slot', 'tss expiry date', 'expiry'],
-    response: ['customer response', 'response', 'analysis', 'conclusion', 'result', 'feedback']
+    status: ['status', 'state', 'condition', 'progress'],
+    time: ['tss expiry date', 'scheduled_date', 'time', 'date', 'last update', 'last_update', 'timestamp', 'updated at', 'expiry'],
+    outcome: ['call outcome', 'outcome', 'last call', 'result', 'call_outcome'],
+    summary: ['summary', 'call summary', 'analysis', 'conclusion', 'remarks', 'notes', 'call_summary'],
+    followUp: ['next_followup_date', 'next action', 'follow up', 'next_followup', 'schedule', 'ai suggestion', 'next_step'],
+    taskStage: ['task_type', 'task_stage', 'task stage', 'current_task', 'step', 'stage', 'task no']
 };
 
 export const fetchTasksFromSheet = async (url) => {
     const targetUrl = url || DEFAULT_SHEET_URL;
     const csvUrl = convertToCsvUrl(targetUrl);
 
-    if (!csvUrl) return DEFAULT_TASKS;
+    if (!csvUrl) return [];
 
     try {
-        // Add cache buster to bypass Google's CDN for real-time updates
         const fetchUrl = `${csvUrl}${csvUrl.includes('?') ? '&' : '?'}_cb=${Date.now()}`;
         const response = await fetch(fetchUrl);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
         const csvText = await response.text();
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
-        if (lines.length < 2) return DEFAULT_TASKS;
+        if (lines.length < 2) return [];
 
         const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
 
@@ -78,7 +80,8 @@ export const fetchTasksFromSheet = async (url) => {
                 id: `T${index + 1}`,
                 status: 'Pending',
                 time: 'Just now',
-                channel: 'Voice'
+                product: 'General',
+                priority: 'Medium'
             };
 
             headers.forEach((header, i) => {
@@ -86,36 +89,35 @@ export const fetchTasksFromSheet = async (url) => {
                 if (!val) return;
                 const h = header.toLowerCase().trim();
 
-                // Store all raw fields for dynamic display
                 task[header] = val;
 
                 if (HEADER_MAPPING.id.includes(h)) task.id = val;
-                else if (HEADER_MAPPING.customer.includes(h)) task.customer = val;
+                else if (HEADER_MAPPING.customer.includes(h)) task.name = val;
                 else if (HEADER_MAPPING.product.includes(h)) task.product = val;
-                else if (HEADER_MAPPING.mobile.includes(h)) {
-                    task.mobile = val;
-                    task.channel = 'Voice';
-                }
-                else if (HEADER_MAPPING.email.includes(h)) {
-                    task.email = val;
-                    if (!task.mobile) task.channel = 'Email';
-                }
-                else if (HEADER_MAPPING.contact.includes(h)) task.contact = val;
-                else if (HEADER_MAPPING.status.includes(h)) {
-                    task.status = val.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-                }
-                else if (HEADER_MAPPING.time.includes(h)) task.time = val;
+                else if (HEADER_MAPPING.mobile.includes(h)) task.mobile = val;
+                else if (HEADER_MAPPING.email.includes(h)) task.email = val;
+                else if (HEADER_MAPPING.outcome.includes(h)) task.callOutcome = val;
+                else if (HEADER_MAPPING.summary.includes(h)) task.emailOutcome = val; // Mapping summary to Digital log for visibility
+                else if (HEADER_MAPPING.followUp.includes(h)) task.followUp = val;
+                else if (HEADER_MAPPING.taskStage.includes(h)) task.taskStage = val;
+                else if (h.includes('priority')) task.priority = val;
+                else if (h.includes('amount') || h.includes('due')) task.amount = val;
+                else if (h.includes('overdue')) task.overdue = val;
             });
 
-            task.customer = task.customer || 'Customer';
-            task.product = task.product || 'General Inquiry';
+            task.name = task.name || 'Unknown Customer';
+            task.amount = task.amount || '₹0';
+            task.overdue = task.overdue || '0 Days';
+            task.callOutcome = task.callOutcome || 'No Activity';
+            task.followUp = task.followUp || 'Schedule: AI Monitoring';
+            task.taskStage = task.taskStage || 'Task 1: Initial';
+            task.emailOutcome = task.emailOutcome || 'Waiting for call...';
+
             return task;
-        }).filter(t => t.customer && t.customer !== 'Customer');
+        });
     } catch (error) {
         console.error('Error fetching Google Sheet data:', error);
-        return [
-            { id: 'TIP', customer: 'Access Denied!', product: 'Go to File > Share > Publish to web', channel: 'Guide', status: 'Failed', time: 'Select CSV & Publish' }
-        ];
+        return [];
     }
 };
 
@@ -157,11 +159,95 @@ export const fetchStockData = async () => {
  */
 export const fetchDuesData = async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
+    // Simulating "Master Recovery Sheet" with exhaustive columns and detailed history
+    const disclaimer = "\n\nDisclaimer: Please ignore if you have already paid your EMI/License Renewal fees.";
+
     return [
-        { id: 'CUST-88', name: 'Acme Corp', amount: '₹1,50,000', overdue: '15 Days', mobile: '+91 98765 43210', priority: 'High' },
-        { id: 'CUST-42', name: 'Blue Sky Ltd', amount: '₹45,000', overdue: '5 Days', mobile: '+91 88888 77777', priority: 'Medium' },
-        { id: 'CUST-15', name: 'Global Tech', amount: '₹2,10,000', overdue: '30 Days', mobile: '+91 70000 11111', priority: 'Critical' },
-        { id: 'CUST-09', name: 'Smart Retail', amount: '₹12,400', overdue: '1 Day', mobile: '+91 99999 00000', priority: 'Low' },
-        { id: 'CUST-77', name: 'Matrix Soft', amount: '₹88,000', overdue: '22 Days', mobile: '+91 81234 56789', priority: 'High' },
+        {
+            row_id: 1,
+            customer_id: '796065660',
+            name: 'Gajanana Elec',
+            mobile: '9724086968',
+            email: 'billing@gajanana.in',
+            product: 'TE9 Silver',
+            amount: '₹45,000',
+            due_date: '2026-02-25',
+            payment_status: 'Unpaid',
+            current_stage: 'T-5 Stage',
+            sap_sync: 'Synced',
+            remarks: 'Active drip flow',
+            priority: 'Critical',
+            detailed_history: {
+                whatsapp: [
+                    { id: 1, stage: 'T-15', date: 'Feb 10', time: '10:00 AM', msg: 'Hi, your license for TE9 Silver is due in 15 days.' + disclaimer, status: 'Read' },
+                    { id: 2, stage: 'T-5', date: 'Feb 20', time: '09:30 AM', msg: 'Urgent: Only 5 days left for your payment.' + disclaimer, status: 'Delivered' }
+                ],
+                emails: [
+                    { id: 1, stage: 'T-10', date: 'Feb 15', time: '11:00 AM', subject: 'Invoice Renewal - 10 Days Left', body: 'Dear Team, please process your ₹45,000 payment.' + disclaimer, status: 'Opened' }
+                ],
+                ai_calls: []
+            }
+        },
+        {
+            row_id: 2,
+            customer_id: '746558766',
+            name: 'R. C. Agencies',
+            mobile: '9888877777',
+            email: 'accounts@rcagencies.com',
+            product: 'TE9 Gold',
+            amount: '₹1,20,000',
+            due_date: '2026-02-05',
+            payment_status: 'Unpaid',
+            current_stage: 'Recovery Stage',
+            sap_sync: 'Pending Sync',
+            remarks: 'AI Agent following up daily',
+            priority: 'High',
+            detailed_history: {
+                whatsapp: [
+                    { id: 1, stage: 'T-15', date: 'Jan 21', time: '10:00 AM', msg: 'Reminder: 15 days left.' + disclaimer, status: 'Read' },
+                    { id: 2, stage: 'T-5', date: 'Jan 31', time: '09:00 AM', msg: 'Reminder: 5 days left.' + disclaimer, status: 'Read' },
+                    { id: 3, stage: 'T-0', date: 'Feb 05', time: '08:00 AM', msg: 'Due today: Please pay ₹1,20,000.' + disclaimer, status: 'Read' }
+                ],
+                emails: [
+                    { id: 1, stage: 'T-10', date: 'Jan 26', time: '09:00 AM', subject: 'Payment Due in 10 Days', body: 'Your Gold license expires on Feb 5.' + disclaimer, status: 'Opened' },
+                    { id: 2, stage: 'T-5', date: 'Jan 31', time: '09:30 AM', subject: 'Urgent Pay: 5 Days Left', body: 'Final reminders started.' + disclaimer, status: 'Seen' },
+                    { id: 3, stage: 'T-0', date: 'Feb 05', time: '08:30 AM', subject: 'DUE TODAY: Action Required', body: 'Please pay immediately.' + disclaimer, status: 'Sent' }
+                ],
+                ai_calls: [
+                    { id: 1, date: 'Feb 06', time: '11:30 AM', transcript: 'AI: Namaste, main Pucho AI se bol rahi hoon... Aapka payment overdue hai. Customer: Haan, kal tak kar dunga.', outcome: 'Agreed' },
+                    { id: 2, date: 'Feb 07', time: '04:00 PM', transcript: 'AI: Hello, kal aapne payment ka promise kiya tha. Status? Customer: Server down hai, sham tak check karein.', outcome: 'Follow-up' },
+                    { id: 3, date: 'Feb 08', time: '10:00 AM', transcript: 'AI: Regular follow-up call. Customer: Doing it now.', outcome: 'Processing' }
+                ]
+            }
+        },
+        {
+            row_id: 3,
+            customer_id: '786534651',
+            name: 'Kalash Textile',
+            mobile: '7000011111',
+            email: 'info@kalashtex.co',
+            product: 'TE9 Gold',
+            amount: '₹88,500',
+            due_date: '2026-02-12',
+            payment_status: 'Paid',
+            current_stage: 'Completed',
+            sap_sync: 'Synced',
+            remarks: 'Flow terminated on payment',
+            priority: 'Low',
+            detailed_history: {
+                whatsapp: [
+                    { id: 1, stage: 'T-15', date: 'Jan 28', time: '10:00 AM', msg: '15 days to go.' + disclaimer, status: 'Read' }
+                ],
+                emails: [
+                    { id: 1, stage: 'T-10', date: 'Feb 02', time: '09:00 AM', subject: 'Renewal Notice', body: '10 days reminder.' + disclaimer, status: 'Opened' }
+                ],
+                ai_calls: []
+            }
+        }
     ];
+
+
+
+
+
 };

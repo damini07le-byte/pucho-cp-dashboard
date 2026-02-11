@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import ActionButtons from './components/ActionButtons';
 import StatCards from './components/StatCards';
 import ActivityList from './components/ActivityList';
 import WorkflowMonitor from './components/WorkflowMonitor';
@@ -133,8 +132,6 @@ const CPDashboard = () => {
                     onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
                 />
 
-                {/* Quick Actions */}
-                <ActionButtons onRun={handleRunCampaign} />
 
                 {/* Primary Stats Dashboard */}
                 {activeSection === 'Overview' && (
