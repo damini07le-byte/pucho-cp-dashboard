@@ -6,15 +6,12 @@ import {
 } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 
-const TALLY_SHEETS = {
-    'UPGRADE': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=0',
-    'OWNER': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=113319197',
-    'RENEWAL': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=307229921'
-};
+// User defined Master URL for all tabs
+const MASTER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=1744069029&single=true&output=csv';
 
 const TallyHub = () => {
     const [activeTab, setActiveTab] = useState('UPGRADE');
-    const { data: rawData, loading, lastUpdated, refetch } = useSheetData(10000, TALLY_SHEETS[activeTab]);
+    const { data: rawData, loading, lastUpdated, refetch } = useSheetData(10000, MASTER_SHEET_URL);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -25,30 +22,8 @@ const TallyHub = () => {
         { id: 'RENEWAL', name: 'License Renewal', icon: <Clock size={18} /> }
     ];
 
-    const getAging = (dateStr) => {
-        if (!dateStr || dateStr === 'N/A') return 'N/A';
-        try {
-            let due;
-            if (dateStr.includes('-')) {
-                const parts = dateStr.split('-');
-                if (parts[0].length === 4) due = new Date(parts[0], parts[1] - 1, parts[2]);
-                else due = new Date(parts[2], parts[1] - 1, parts[0]);
-            } else due = new Date(dateStr);
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diff = Math.round((due - today) / 86400000);
-
-            if (diff === 0) return "Due Today";
-            if (diff < 0) return `${Math.abs(diff)} Days Past`;
-            return `${diff} Days Left`;
-        } catch (e) {
-            return dateStr;
-        }
-    };
-
     const handleAction = async (type, customer) => {
-        const id = customer['Serial Number'] || customer['Customer ID'] || customer['Row ID'];
+        const id = customer['Serial Number'] || customer['Row ID'] || 'N/A';
         setActionLoading(`${type}-${id}`);
         const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/66x93VhoK1DTe9ZlJflZs';
 
@@ -80,13 +55,17 @@ const TallyHub = () => {
 
     const transformedData = useMemo(() => {
         return (rawData || []).map(row => {
-            const name = row['Org Name'] || row['Customer Name'] || 'Unknown';
-            const id = row['Serial Number'] || row['Customer ID'] || 'N/A';
-            const email = row['Email ID'] || row['Email'] || 'N/A';
-            const date = row['TSS Expiry Date'] || row['Due Date'] || 'N/A';
+            const name = row['Org Name'] || 'Unknown';
+            const id = row['Serial Number'] || 'N/A';
+            const email = row['Email ID'] || 'N/A';
+            const date = row['TSS Expiry Date'] || 'N/A';
+            const aging = row['Day Due'] || 'N/A';
 
-            // Smart log detection: checking common calling/log columns
-            const callingLog = row['Manual Call'] || row['Manual Call Log'] || row['Call_Summary'] || row['Overdue AI Call'] || row['Manual Actions Log'] || row['Log History'];
+            // Map calling logs based on active tab
+            let callingLog = '';
+            if (activeTab === 'UPGRADE') callingLog = row['U-CALL'];
+            else if (activeTab === 'OWNER') callingLog = row['O-CALL'];
+            else if (activeTab === 'RENEWAL') callingLog = row['L-CALL'];
 
             return {
                 ...row,
@@ -94,11 +73,11 @@ const TallyHub = () => {
                 _displayId: id,
                 _displayEmail: email,
                 _displayDate: date,
-                _aging: getAging(date),
+                _aging: aging,
                 _callingLog: callingLog
             };
         });
-    }, [rawData]);
+    }, [rawData, activeTab]);
 
     const filteredData = transformedData.filter(item => {
         const search = searchTerm.toLowerCase();
@@ -113,20 +92,18 @@ const TallyHub = () => {
     const parseLogs = (logString) => {
         if (!logString || logString === 'N/A' || logString === 'Pending' || logString === '#REF!') return [];
 
-        // Split by marker or treat as single entry
-        const logs = logString.includes('---') ? logString.split('---') : [logString];
+        const logs = logString.split('---').filter(l => l.trim());
+        if (logs.length === 0 && logString.trim()) logs.push(logString.trim());
 
         return logs.map(log => {
             const trimmedLog = log.trim();
-            if (!trimmedLog) return null;
-
             const lines = trimmedLog.split('\n');
-            const timestamp = lines[0] || 'Recently Updated';
-            const isManualCall = trimmedLog.includes('[MANUAL CALL]') || trimmedLog.includes('AI CALL');
+            const timestamp = lines[0] || 'Activity Log';
+            const isManualCall = trimmedLog.includes('[MANUAL CALL]');
 
             let status = 'DELIVERED';
-            if (trimmedLog.toLowerCase().includes('status: failed') || trimmedLog.toLowerCase().includes('failed')) status = 'FAILED';
-            if (trimmedLog.toLowerCase().includes('status: success') || trimmedLog.toLowerCase().includes('success')) status = 'SUCCESS';
+            if (trimmedLog.toLowerCase().includes('status: failed')) status = 'FAILED';
+            if (trimmedLog.toLowerCase().includes('status: success')) status = 'SUCCESS';
 
             return {
                 timestamp,
@@ -134,7 +111,7 @@ const TallyHub = () => {
                 status,
                 content: trimmedLog
             };
-        }).filter(l => l && (l.timestamp || l.content)).reverse();
+        }).filter(l => l.content).reverse();
     };
 
     return (
@@ -160,8 +137,8 @@ const TallyHub = () => {
                     <h2 className="text-xl font-black text-[#1e293b] uppercase tracking-tight">
                         {tabs.find(t => t.id === activeTab).name} Hub
                     </h2>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        Active Tally Management Dashboard
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1 text-blue-600">
+                        {activeTab} MODE ACTIVE
                     </p>
                 </div>
 
@@ -222,7 +199,7 @@ const TallyHub = () => {
                                             <span className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
                                                 {customer['Product'] || 'N/A'}
                                             </span>
-                                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${customer._aging.includes('Past') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-600">
                                                 {customer._aging}
                                             </span>
                                         </div>
@@ -253,11 +230,14 @@ const TallyHub = () => {
                                         </button>
                                     </div>
 
-                                    <div className="mt-3 flex items-center justify-between px-1">
+                                    <div className="mt-4 flex items-center justify-between px-1">
                                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            History Available: {parseLogs(customer._callingLog).length}
+                                            Actions Log: {parseLogs(customer._callingLog).length}
                                         </p>
-                                        <Info size={14} className="text-gray-300" />
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[9px] font-black text-blue-500 uppercase">View History</span>
+                                            <Info size={12} className="text-blue-500" />
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
@@ -267,7 +247,7 @@ const TallyHub = () => {
                             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Search size={32} className="text-gray-300" />
                             </div>
-                            <h3 className="text-lg font-black text-[#1e293b] uppercase">No Data Found</h3>
+                            <h3 className="text-lg font-black text-[#1e293b] uppercase">No Data in Hub</h3>
                         </div>
                     )}
                 </AnimatePresence>
@@ -285,23 +265,22 @@ const TallyHub = () => {
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{selectedCustomer._displayId}</span>
                                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Calling History</span>
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{activeTab} History</span>
                                         </div>
                                     </div>
                                     <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
                                 </div>
 
                                 <div className="max-h-[450px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                                    {/* Action History Parsing */}
                                     {parseLogs(selectedCustomer._callingLog).length > 0 ? (
                                         parseLogs(selectedCustomer._callingLog).map((log, i) => (
                                             <div key={i} className="p-5 rounded-3xl bg-gray-50 border border-black/5 shadow-sm">
                                                 <div className="flex items-center justify-between mb-3 pb-3 border-b border-black/[0.03]">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="p-1.5 rounded-lg bg-blue-100 text-blue-600">
+                                                        <div className="p-1.5 rounded-lg bg-red-100 text-red-600">
                                                             <Phone size={14} />
                                                         </div>
-                                                        <span className="text-[11px] font-black uppercase tracking-tight text-[#1e293b]">Activity Report</span>
+                                                        <span className="text-[11px] font-black uppercase tracking-tight text-[#1e293b]">{activeTab} Activity</span>
                                                     </div>
                                                     <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                                         {log.status}
@@ -318,23 +297,24 @@ const TallyHub = () => {
                                             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200">
                                                 <PhoneCall className="text-gray-300" size={32} />
                                             </div>
-                                            <h4 className="text-sm font-black text-[#1e293b] uppercase">No Calling Logs Found</h4>
-                                            <p className="text-[11px] font-bold text-gray-400 mt-2 px-10">We couldn't find any calling data for this customer in the sheet. Please confirm the 'Manual Call' column exists.</p>
+                                            <h4 className="text-sm font-black text-[#1e293b] uppercase">No Activity Recorded</h4>
+                                            <p className="text-[11px] font-bold text-gray-400 mt-2">Checking column: {activeTab === 'UPGRADE' ? 'U-CALL' : activeTab === 'OWNER' ? 'O-CALL' : 'L-CALL'}</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Manual Action Button inside Modal */}
-                            <div className="p-6 bg-gray-50 border-t border-black/5 space-y-3">
+                            <div className="p-6 bg-gray-100/50 border-t border-black/5 space-y-3">
                                 <button
                                     onClick={() => handleAction('call', selectedCustomer)}
                                     disabled={actionLoading}
-                                    className="w-full py-4 rounded-2xl bg-blue-600 text-white text-[12px] font-black uppercase shadow-lg shadow-blue-100 flex items-center justify-center gap-3 hover:bg-blue-700 transition-all active:scale-95"
+                                    className="w-full py-4 rounded-2xl bg-[#1e293b] text-white text-[12px] font-black uppercase shadow-lg flex items-center justify-center gap-3 hover:bg-black transition-all"
                                 >
-                                    <PhoneCall size={18} fill="white" /> Trigger Manual AI Recovery Call
+                                    <PhoneCall size={18} fill="white" /> Trigger Manual Action
                                 </button>
-                                <button onClick={() => setSelectedCustomer(null)} className="w-full py-3 text-[11px] font-black text-gray-400 uppercase tracking-widest hover:text-[#1e293b] transition-colors">Close Overview</button>
+                                <button onClick={() => setSelectedCustomer(null)} className="w-full py-3 text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2 hover:text-[#1e293b] transition-colors">
+                                    Close details <X size={14} />
+                                </button>
                             </div>
                         </motion.div>
                     </div>
