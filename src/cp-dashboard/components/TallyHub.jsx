@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Phone, Mail, User, Search, RefreshCw,
-    Clock, Zap, Users, X, Info, ShieldCheck, Tag, Calendar
+    Clock, Zap, Users, X, Info, ShieldCheck, Tag, Calendar, PhoneCall
 } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 
@@ -25,22 +25,15 @@ const TallyHub = () => {
         { id: 'RENEWAL', name: 'License Renewal', icon: <Clock size={18} /> }
     ];
 
-    // Helper to calculate aging
     const getAging = (dateStr) => {
         if (!dateStr || dateStr === 'N/A') return 'N/A';
         try {
             let due;
             if (dateStr.includes('-')) {
-                // Handle DD-MM-YYYY or YYYY-MM-DD
                 const parts = dateStr.split('-');
-                if (parts[0].length === 4) {
-                    due = new Date(parts[0], parts[1] - 1, parts[2]);
-                } else {
-                    due = new Date(parts[2], parts[1] - 1, parts[0]);
-                }
-            } else {
-                due = new Date(dateStr);
-            }
+                if (parts[0].length === 4) due = new Date(parts[0], parts[1] - 1, parts[2]);
+                else due = new Date(parts[2], parts[1] - 1, parts[0]);
+            } else due = new Date(dateStr);
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -75,7 +68,7 @@ const TallyHub = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (res.ok) alert(`Success: ${type.toUpperCase()} triggered for ${customer['Org Name'] || customer['Customer Name'] || 'Customer'}`);
+            if (res.ok) alert(`Success: Manual call triggered for ${customer._displayName}`);
             else alert('Failed to trigger action');
         } catch (err) {
             console.error(err);
@@ -85,7 +78,6 @@ const TallyHub = () => {
         }
     };
 
-    // Unified mapping for all 3 tabs
     const transformedData = useMemo(() => {
         return (rawData || []).map(row => {
             const name = row['Org Name'] || row['Customer Name'] || 'Unknown';
@@ -93,13 +85,17 @@ const TallyHub = () => {
             const email = row['Email ID'] || row['Email'] || 'N/A';
             const date = row['TSS Expiry Date'] || row['Due Date'] || 'N/A';
 
+            // Smart log detection: checking common calling/log columns
+            const callingLog = row['Manual Call'] || row['Manual Call Log'] || row['Call_Summary'] || row['Overdue AI Call'] || row['Manual Actions Log'] || row['Log History'];
+
             return {
                 ...row,
                 _displayName: name,
                 _displayId: id,
                 _displayEmail: email,
                 _displayDate: date,
-                _aging: getAging(date)
+                _aging: getAging(date),
+                _callingLog: callingLog
             };
         });
     }, [rawData]);
@@ -115,28 +111,34 @@ const TallyHub = () => {
     });
 
     const parseLogs = (logString) => {
-        if (!logString) return [];
-        return logString.split('---').map(log => {
-            const lines = log.trim().split('\n');
-            const timestamp = lines[0] || '';
-            const isManualCall = log.includes('[MANUAL CALL]');
+        if (!logString || logString === 'N/A' || logString === 'Pending' || logString === '#REF!') return [];
+
+        // Split by marker or treat as single entry
+        const logs = logString.includes('---') ? logString.split('---') : [logString];
+
+        return logs.map(log => {
+            const trimmedLog = log.trim();
+            if (!trimmedLog) return null;
+
+            const lines = trimmedLog.split('\n');
+            const timestamp = lines[0] || 'Recently Updated';
+            const isManualCall = trimmedLog.includes('[MANUAL CALL]') || trimmedLog.includes('AI CALL');
 
             let status = 'DELIVERED';
-            if (log.includes('Status: FAILED')) status = 'FAILED';
-            if (log.includes('Status: SUCCESS')) status = 'SUCCESS';
+            if (trimmedLog.toLowerCase().includes('status: failed') || trimmedLog.toLowerCase().includes('failed')) status = 'FAILED';
+            if (trimmedLog.toLowerCase().includes('status: success') || trimmedLog.toLowerCase().includes('success')) status = 'SUCCESS';
 
             return {
                 timestamp,
                 type: isManualCall ? 'CALL' : 'ACTION',
                 status,
-                content: log
+                content: trimmedLog
             };
-        }).filter(l => l.timestamp).reverse();
+        }).filter(l => l && (l.timestamp || l.content)).reverse();
     };
 
     return (
         <div className="space-y-6">
-            {/* Tab Navigation */}
             <div className="flex flex-wrap items-center gap-2 bg-white/50 p-1.5 rounded-[24px] border border-black/5 w-fit shadow-sm">
                 {tabs.map((tab) => (
                     <button
@@ -153,7 +155,6 @@ const TallyHub = () => {
                 ))}
             </div>
 
-            {/* Header & Search */}
             <div className="bg-white p-6 rounded-[32px] border border-black/5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl font-black text-[#1e293b] uppercase tracking-tight">
@@ -189,7 +190,6 @@ const TallyHub = () => {
                 </div>
             </div>
 
-            {/* Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence mode="popLayout">
                     {filteredData.length > 0 ? (
@@ -200,7 +200,8 @@ const TallyHub = () => {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white rounded-[32px] border border-black/5 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col group"
+                                className="bg-white rounded-[32px] border border-black/5 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col group cursor-pointer"
+                                onClick={() => setSelectedCustomer(customer)}
                             >
                                 <div className="p-6 flex-1">
                                     <div className="flex justify-between items-start mb-4">
@@ -240,31 +241,24 @@ const TallyHub = () => {
                                             <Mail size={14} className="text-gray-400" />
                                             <span className="truncate">{customer._displayEmail}</span>
                                         </div>
-                                        <div className="flex items-center justify-between border-t border-black/5 pt-2 mt-2">
-                                            <div className="flex items-center gap-2">
-                                                <Calendar size={14} className="text-blue-500" />
-                                                <span className="text-[11px] text-gray-400 uppercase">Due Date</span>
-                                            </div>
-                                            <span className="text-[11px] font-black text-[#1e293b]">{customer._displayDate}</span>
-                                        </div>
                                     </div>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={() => handleAction('call', customer)}
                                             disabled={actionLoading}
                                             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition-all font-black text-[11px] uppercase tracking-widest shadow-lg shadow-blue-200 active:scale-95 disabled:opacity-50"
                                         >
-                                            <Phone size={16} fill="white" /> CALL AI AGENT
+                                            <PhoneCall size={16} fill="white" /> CALL AI AGENT
                                         </button>
                                     </div>
 
-                                    <button
-                                        onClick={() => setSelectedCustomer(customer)}
-                                        className="w-full mt-3 py-2.5 rounded-2xl bg-white border border-black/5 text-gray-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 hover:text-[#1e293b] transition-all"
-                                    >
-                                        <Info size={14} /> View History & Details
-                                    </button>
+                                    <div className="mt-3 flex items-center justify-between px-1">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                            History Available: {parseLogs(customer._callingLog).length}
+                                        </p>
+                                        <Info size={14} className="text-gray-300" />
+                                    </div>
                                 </div>
                             </motion.div>
                         ))
@@ -274,13 +268,11 @@ const TallyHub = () => {
                                 <Search size={32} className="text-gray-300" />
                             </div>
                             <h3 className="text-lg font-black text-[#1e293b] uppercase">No Data Found</h3>
-                            <p className="text-sm font-bold text-gray-400 mt-2">Try switching tabs or adjusting your search filters.</p>
                         </div>
                     )}
                 </AnimatePresence>
             </div>
 
-            {/* Details Modal */}
             <AnimatePresence>
                 {selectedCustomer && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -290,43 +282,59 @@ const TallyHub = () => {
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
                                         <h3 className="text-xl font-black text-[#1e293b] truncate max-w-[300px]">{selectedCustomer._displayName}</h3>
-                                        <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Customer Insight Hub</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{selectedCustomer._displayId}</span>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Calling History</span>
+                                        </div>
                                     </div>
                                     <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
                                 </div>
 
-                                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                                <div className="max-h-[450px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                                     {/* Action History Parsing */}
-                                    {(parseLogs(selectedCustomer['Manual Actions Log'] || selectedCustomer['Log History'] || selectedCustomer['Manual Call'])).length > 0 ? (
-                                        parseLogs(selectedCustomer['Manual Actions Log'] || selectedCustomer['Log History'] || selectedCustomer['Manual Call']).map((log, i) => (
-                                            <div key={i} className="p-4 rounded-3xl bg-gray-50 border border-black/5">
-                                                <div className="flex items-center justify-between mb-2">
+                                    {parseLogs(selectedCustomer._callingLog).length > 0 ? (
+                                        parseLogs(selectedCustomer._callingLog).map((log, i) => (
+                                            <div key={i} className="p-5 rounded-3xl bg-gray-50 border border-black/5 shadow-sm">
+                                                <div className="flex items-center justify-between mb-3 pb-3 border-b border-black/[0.03]">
                                                     <div className="flex items-center gap-2">
                                                         <div className="p-1.5 rounded-lg bg-blue-100 text-blue-600">
                                                             <Phone size={14} />
                                                         </div>
-                                                        <span className="text-[10px] font-black uppercase tracking-widest">AI CALL LOG</span>
+                                                        <span className="text-[11px] font-black uppercase tracking-tight text-[#1e293b]">Activity Report</span>
                                                     </div>
-                                                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                                         {log.status}
                                                     </span>
                                                 </div>
-                                                <p className="text-[10px] text-gray-400 font-bold mb-2">{log.timestamp}</p>
-                                                <div className="text-[12px] text-gray-600 font-medium whitespace-pre-wrap leading-relaxed">
-                                                    {log.content.split('\n').slice(2).join('\n')}
+                                                <p className="text-[10px] text-gray-400 font-bold mb-3">{log.timestamp}</p>
+                                                <div className="text-[12px] text-gray-600 font-medium whitespace-pre-wrap leading-relaxed bg-white p-4 rounded-2xl border border-black/[0.02]">
+                                                    {log.content.includes('\n') ? log.content.split('\n').slice(1).join('\n').trim() : log.content}
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
                                         <div className="py-20 text-center">
-                                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200"><Clock className="text-gray-300" /></div>
-                                            <p className="text-sm font-bold text-gray-400">No activity recorded for this company.</p>
+                                            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200">
+                                                <PhoneCall className="text-gray-300" size={32} />
+                                            </div>
+                                            <h4 className="text-sm font-black text-[#1e293b] uppercase">No Calling Logs Found</h4>
+                                            <p className="text-[11px] font-bold text-gray-400 mt-2 px-10">We couldn't find any calling data for this customer in the sheet. Please confirm the 'Manual Call' column exists.</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            <div className="p-6 bg-gray-50 border-t border-black/5 flex justify-end">
-                                <button onClick={() => setSelectedCustomer(null)} className="px-6 py-2.5 rounded-2xl bg-[#1e293b] text-white text-[12px] font-black uppercase shadow-lg shadow-slate-200">Close Hub</button>
+
+                            {/* Manual Action Button inside Modal */}
+                            <div className="p-6 bg-gray-50 border-t border-black/5 space-y-3">
+                                <button
+                                    onClick={() => handleAction('call', selectedCustomer)}
+                                    disabled={actionLoading}
+                                    className="w-full py-4 rounded-2xl bg-blue-600 text-white text-[12px] font-black uppercase shadow-lg shadow-blue-100 flex items-center justify-center gap-3 hover:bg-blue-700 transition-all active:scale-95"
+                                >
+                                    <PhoneCall size={18} fill="white" /> Trigger Manual AI Recovery Call
+                                </button>
+                                <button onClick={() => setSelectedCustomer(null)} className="w-full py-3 text-[11px] font-black text-gray-400 uppercase tracking-widest hover:text-[#1e293b] transition-colors">Close Overview</button>
                             </div>
                         </motion.div>
                     </div>
