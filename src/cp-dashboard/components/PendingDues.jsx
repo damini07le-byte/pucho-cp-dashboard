@@ -8,7 +8,7 @@ import {
 import { useSheetData } from '../hooks/useSheetData';
 
 const PendingDues = () => {
-    const { data, loading, error, lastUpdated, refetch } = useSheetData(30000);
+    const { data, loading, error, lastUpdated, refetch } = useSheetData(10000); // Fast 10s auto-refresh
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [manualLoading, setManualLoading] = useState(null); // 'call', 'whatsapp', 'email'
 
@@ -123,8 +123,13 @@ const PendingDues = () => {
         const timestamp = dateMatch ? dateMatch[0] : 'Time Pending';
         const content = logString.replace(timestamp, '').replace('|', '').trim();
 
+        // Extract internal status if present (e.g., "| Status: SUCCESS |")
+        const statusMatch = logString.match(/Status:\s*(SUCCESS|FAILED)/i);
+        const status = statusMatch ? statusMatch[1].toUpperCase() : null;
+
         return {
             timestamp: timestamp,
+            status: status,
             content: content || 'Status Updated'
         };
     };
@@ -169,7 +174,7 @@ const PendingDues = () => {
             <div className="bg-white p-6 rounded-[32px] min-h-[500px] flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-[#1e293b] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Live Sync Syncing...</p>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Entering Hub...</p>
                 </div>
             </div>
         );
@@ -207,12 +212,11 @@ const PendingDues = () => {
 
             {/* Customer Cards - Compact */}
             <div className="space-y-4">
-                {transformedCustomers.map((customer, index) => (
+                {transformedCustomers.map((customer) => (
                     <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
+                        key={customer['Customer ID']}
+                        initial={false} // Disable entry animation on sync
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03 }}
                         whileHover={{ y: -2 }}
                         className="bg-white rounded-[28px] p-5 border border-gray-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] hover:border-blue-200 hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.1)] transition-all duration-300 group cursor-pointer"
                     >
@@ -508,9 +512,9 @@ const CompactStage = ({ title, log, icon, medium, color, fullWidth = false }) =>
                 {log && (
                     <div className="text-right">
                         <div className="flex items-center justify-end gap-1.5 mb-1">
-                            <div className={`w-1.5 h-1.5 rounded-full ${log.em?.status === 'FAILED' || log.wa?.status === 'FAILED' ? 'bg-red-500' : 'bg-green-500'} animate-pulse`} />
-                            <span className={`text-[9px] font-black uppercase ${log.em?.status === 'FAILED' || log.wa?.status === 'FAILED' ? 'text-red-600' : 'text-green-600'}`}>
-                                {log.em?.status || log.wa?.status || 'Sent'}
+                            <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'FAILED' || log.em?.status === 'FAILED' || log.wa?.status === 'FAILED' ? 'bg-red-500' : 'bg-green-500'} animate-pulse`} />
+                            <span className={`text-[9px] font-black uppercase ${log.status === 'FAILED' || log.em?.status === 'FAILED' || log.wa?.status === 'FAILED' ? 'text-red-600' : 'text-green-600'}`}>
+                                {log.status || log.em?.status || log.wa?.status || 'Sent'}
                             </span>
                         </div>
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter tabular-nums">

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Papa from 'papaparse';
 
-// Fixed URL with specific GID to fetch the correct data sheet
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=307229921';
+// Export URL for near real-time data (bypasses 5-min publish cache)
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/export?format=csv&gid=307229921';
 
 export const useSheetData = (refreshInterval = 30000) => {
     const [data, setData] = useState([]);
@@ -30,7 +30,6 @@ export const useSheetData = (refreshInterval = 30000) => {
                     if (results.data) {
                         setData(results.data);
                         setLastUpdated(new Date());
-                        console.log(`🕒 Auto-Synced at ${new Date().toLocaleTimeString()} | Rows: ${results.data.length}`);
                     }
                     setLoading(false);
                 }
