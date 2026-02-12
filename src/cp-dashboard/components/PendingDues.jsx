@@ -201,7 +201,7 @@ const PendingDues = () => {
                     <div className="text-right">
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Sync</p>
                         <p className="text-[13px] font-black text-[#1e293b]">
-                            {lastUpdated?.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) || '04:03 PM'}
+                            {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}
                         </p>
                     </div>
                     <button onClick={refetch} className="p-2 bg-white border border-gray-100 rounded-xl hover:bg-gray-50 transition-all shadow-sm">

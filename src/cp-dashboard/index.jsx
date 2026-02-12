@@ -37,7 +37,6 @@ const CPDashboard = () => {
 
         const interval = setInterval(() => {
             if (!isSyncing) {
-                console.log('Auto-syncing both sheets...');
                 handleSyncData(CUSTOMER_SHEET_URL, true, 'customers');
                 handleSyncData(TASK_SHEET_URL, true, 'tasks');
             }
