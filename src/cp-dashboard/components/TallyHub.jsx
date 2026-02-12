@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Phone, MessageSquare, Mail, User, Search, RefreshCw,
-    ArrowUpRight, Clock, ShieldCheck, Zap, BarChart3, Users
+    Clock, Zap, Users, X, Info, ChevronRight, MessageCircle
 } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 
@@ -14,9 +14,10 @@ const TALLY_SHEETS = {
 
 const TallyHub = () => {
     const [activeTab, setActiveTab] = useState('UPGRADE');
-    const { data: rawData, loading, error, lastUpdated, refetch } = useSheetData(10000, TALLY_SHEETS[activeTab]);
+    const { data: rawData, loading, lastUpdated, refetch } = useSheetData(10000, TALLY_SHEETS[activeTab]);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     const tabs = [
         { id: 'UPGRADE', name: 'Tally Upgrade', icon: <Zap size={18} /> },
@@ -26,16 +27,15 @@ const TallyHub = () => {
 
     const handleAction = async (type, customer) => {
         setActionLoading(`${type}-${customer['Customer ID']}`);
-        // Unified Webhook for all Tally Hub actions
         const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/66x93VhoK1DTe9ZlJflZs';
 
         const payload = {
-            action_type: type,        // 'call', 'whatsapp', or 'email'
-            category: activeTab,      // 'UPGRADE', 'OWNER', or 'RENEWAL'
+            action_type: type,
+            category: activeTab,
             customer_data: {
-                ...customer,          // Sending complete sheet data including sheet_row_number
+                ...customer,
                 source: "Tally_Hub",
-                triggered_at: new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })
+                triggered_at: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
             }
         };
 
@@ -45,7 +45,7 @@ const TallyHub = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (res.ok) alert(`Success: ${type.toUpperCase()} triggered for ${customer['Customer Name'] || customer['name']}`);
+            if (res.ok) alert(`Success: ${type.toUpperCase()} triggered for ${customer['Customer Name'] || 'Customer'}`);
             else alert('Failed to trigger action');
         } catch (err) {
             console.error(err);
@@ -63,6 +63,29 @@ const TallyHub = () => {
             (item['Mobile'] || '').toLowerCase().includes(search)
         );
     });
+
+    // Helper to parse logs from sheet column (assuming 'Manual Actions Log' or similar)
+    const parseLogs = (logString) => {
+        if (!logString) return [];
+        return logString.split('---').map(log => {
+            const lines = log.trim().split('\n');
+            const timestamp = lines[0] || '';
+            const isManualCall = log.includes('[MANUAL CALL]');
+            const isWhatsapp = log.includes('[WHATSAPP]');
+            const isEmail = log.includes('[EMAIL]');
+
+            let status = 'DELIVERED';
+            if (log.includes('Status: FAILED')) status = 'FAILED';
+            if (log.includes('Status: SUCCESS') || log.includes('Status: SENT')) status = 'SUCCESS';
+
+            return {
+                timestamp,
+                type: isManualCall ? 'CALL' : isWhatsapp ? 'WHATSAPP' : isEmail ? 'EMAIL' : 'ACTION',
+                status,
+                content: log
+            };
+        }).filter(l => l.timestamp).reverse();
+    };
 
     return (
         <div className="space-y-6">
@@ -89,9 +112,6 @@ const TallyHub = () => {
                     <h2 className="text-xl font-black text-[#1e293b] uppercase tracking-tight">
                         {tabs.find(t => t.id === activeTab).name} Hub
                     </h2>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        Management & Outreach Control
-                    </p>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -109,13 +129,10 @@ const TallyHub = () => {
                                 placeholder="Search customer..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-2xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 w-[240px] transition-all"
+                                className="pl-10 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-2xl text-[13px] font-bold outline-none w-[220px]"
                             />
                         </div>
-                        <button
-                            onClick={refetch}
-                            className="p-2.5 bg-white border border-black/5 rounded-2xl hover:bg-gray-50 transition-all text-[#1e293b]"
-                        >
+                        <button onClick={refetch} className="p-2.5 bg-white border border-black/5 rounded-2xl">
                             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                         </button>
                     </div>
@@ -123,94 +140,110 @@ const TallyHub = () => {
             </div>
 
             {/* Cards Grid */}
-            {loading && !rawData.length ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="h-[240px] bg-white rounded-[32px] animate-pulse border border-black/5" />
-                    ))}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <AnimatePresence mode="popLayout">
-                        {filteredData.map((customer, idx) => (
-                            <motion.div
-                                key={customer['Customer ID'] || idx}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white rounded-[32px] border border-black/5 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 group overflow-hidden"
-                            >
-                                <div className="p-6 space-y-4">
-                                    {/* Card Header */}
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-inner">
-                                                <User size={24} />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-[#1e293b] text-[15px] leading-tight limit-1">
-                                                    {customer['Customer Name'] || 'Unknown Entity'}
-                                                </h3>
-                                                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">
-                                                    ID: {customer['Customer ID'] || 'N/A'}
-                                                </p>
-                                            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence mode="popLayout">
+                    {filteredData.map((customer, idx) => (
+                        <motion.div
+                            key={customer['Customer ID'] || idx}
+                            layout
+                            className="bg-white rounded-[32px] border border-black/5 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6 flex-1">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
+                                            <User size={24} />
                                         </div>
-                                        <div className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
-                                            {customer['Status'] || 'Pending'}
+                                        <div>
+                                            <h3 className="font-black text-[#1e293b] text-[15px]">{customer['Customer Name'] || 'Unknown'}</h3>
+                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">ID: {customer['Customer ID'] || 'N/A'}</p>
                                         </div>
                                     </div>
-
-                                    {/* Card Body */}
-                                    <div className="space-y-2 py-2">
-                                        <div className="flex items-center gap-3 text-[12px] font-bold text-gray-600">
-                                            <Phone size={14} className="text-gray-400" />
-                                            <span>{customer['Mobile'] || 'No Phone'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-[12px] font-bold text-gray-600">
-                                            <Mail size={14} className="text-gray-400" />
-                                            <span className="truncate">{customer['Email'] || 'No Email'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-[12px] font-bold text-gray-600">
-                                            <Clock size={14} className="text-gray-400" />
-                                            <span>{customer['Ageing'] || customer['Due Date'] || 'Recent'} Days</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Card Actions */}
-                                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-50">
-                                        <button
-                                            onClick={() => handleAction('call', customer)}
-                                            disabled={actionLoading}
-                                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all group/btn"
-                                        >
-                                            <Phone size={16} fill={actionLoading === `call-${customer['Customer ID']}` ? "currentColor" : "none"} />
-                                            <span className="text-[9px] font-black uppercase">Call AI</span>
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction('whatsapp', customer)}
-                                            disabled={actionLoading}
-                                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all group/btn"
-                                        >
-                                            <MessageSquare size={16} fill={actionLoading === `whatsapp-${customer['Customer ID']}` ? "currentColor" : "none"} />
-                                            <span className="text-[9px] font-black uppercase">WhatsApp</span>
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction('email', customer)}
-                                            disabled={actionLoading}
-                                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all group/btn"
-                                        >
-                                            <Mail size={16} fill={actionLoading === `email-${customer['Customer ID']}` ? "currentColor" : "none"} />
-                                            <span className="text-[9px] font-black uppercase">Email</span>
-                                        </button>
-                                    </div>
+                                    <span className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
+                                        {customer['Status'] || 'Pending'}
+                                    </span>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
-            )}
+
+                                <div className="space-y-2 mb-6 text-[12px] font-bold text-gray-600">
+                                    <div className="flex items-center gap-3"><Phone size={14} className="text-gray-400" /> {customer['Mobile'] || 'N/A'}</div>
+                                    <div className="flex items-center gap-3"><Mail size={14} className="text-gray-400" /> {customer['Email'] || 'N/A'}</div>
+                                    <div className="flex items-center gap-3"><Clock size={14} className="text-gray-400" /> {customer['Ageing'] || '0'} Days Due</div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2 pb-4 border-b border-gray-50">
+                                    <button onClick={() => handleAction('call', customer)} className="flex flex-col items-center p-2 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all">
+                                        <Phone size={16} /> <span className="text-[9px] font-black uppercase mt-1">Call AI</span>
+                                    </button>
+                                    <button onClick={() => handleAction('whatsapp', customer)} className="flex flex-col items-center p-2 rounded-2xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all">
+                                        <MessageSquare size={16} /> <span className="text-[9px] font-black uppercase mt-1">WhatsApp</span>
+                                    </button>
+                                    <button onClick={() => handleAction('email', customer)} className="flex flex-col items-center p-2 rounded-2xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all">
+                                        <Mail size={16} /> <span className="text-[9px] font-black uppercase mt-1">Email</span>
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedCustomer(customer)}
+                                    className="w-full mt-4 py-2.5 rounded-2xl bg-gray-50 text-gray-500 text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#1e293b] hover:text-white transition-all"
+                                >
+                                    <Info size={14} /> View Details
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {/* Details Modal */}
+            <AnimatePresence>
+                {selectedCustomer && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCustomer(null)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden">
+                            <div className="p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h3 className="text-xl font-black text-[#1e293b]">{selectedCustomer['Customer Name']}</h3>
+                                        <p className="text-xs font-bold text-gray-400 mt-1">Activity History & AI Logs</p>
+                                    </div>
+                                    <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
+                                </div>
+
+                                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                                    {(parseLogs(selectedCustomer['Manual Actions Log'] || selectedCustomer['Log History'])).length > 0 ? (
+                                        parseLogs(selectedCustomer['Manual Actions Log'] || selectedCustomer['Log History']).map((log, i) => (
+                                            <div key={i} className="p-4 rounded-3xl bg-gray-50 border border-black/5">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={`p-1.5 rounded-lg ${log.type === 'CALL' ? 'bg-blue-100 text-blue-600' : log.type === 'WHATSAPP' ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600'}`}>
+                                                            {log.type === 'CALL' ? <Phone size={14} /> : log.type === 'WHATSAPP' ? <MessageCircle size={14} /> : <Mail size={14} />}
+                                                        </div>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">{log.type} Details</span>
+                                                    </div>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                                        {log.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 font-bold mb-2">{log.timestamp}</p>
+                                                <div className="text-[12px] text-gray-600 font-medium whitespace-pre-wrap leading-relaxed">
+                                                    {log.content.split('\n').slice(2).join('\n')}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="py-20 text-center">
+                                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200"><Clock className="text-gray-300" /></div>
+                                            <p className="text-sm font-bold text-gray-400">No activity recorded for this customer.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="p-6 bg-gray-50 border-t border-black/5 flex justify-end">
+                                <button onClick={() => setSelectedCustomer(null)} className="px-6 py-2.5 rounded-2xl bg-[#1e293b] text-white text-[12px] font-black uppercase">Close Hub</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
