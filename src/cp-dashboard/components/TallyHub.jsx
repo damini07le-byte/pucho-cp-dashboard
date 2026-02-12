@@ -212,13 +212,7 @@ const TallyHub = () => {
                                 className="bg-white rounded-[32px] border border-black/5 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col group cursor-pointer relative"
                                 onClick={() => setSelectedCustomer(customer)}
                             >
-                                {customer._hasActivity && (
-                                    <div className="absolute top-4 right-4 z-10">
-                                        <div className="bg-blue-500 text-white px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest animate-pulse">
-                                            Active Task
-                                        </div>
-                                    </div>
-                                )}
+
 
                                 <div className="p-6 flex-1">
                                     <div className="flex justify-between items-start mb-4">
@@ -240,8 +234,8 @@ const TallyHub = () => {
                                                 {customer['Product'] || 'TE9 Silver'}
                                             </span>
                                             <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg border ${customer._aging.toLowerCase().includes('past')
-                                                    ? 'bg-red-50 text-red-600 border-red-100'
-                                                    : 'bg-green-50 text-green-600 border-green-100'
+                                                ? 'bg-red-50 text-red-600 border-red-100'
+                                                : 'bg-green-50 text-green-600 border-green-100'
                                                 }`}>
                                                 {customer._aging}
                                             </span>
