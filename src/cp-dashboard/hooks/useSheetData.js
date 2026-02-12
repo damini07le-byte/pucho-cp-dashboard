@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Papa from 'papaparse';
 
-// Export URL for near real-time data (bypasses 5-min publish cache)
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/export?format=csv&gid=307229921';
+// gviz/tq endpoint: Near real-time, CORS-friendly, and bypasses the 5-min cache
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/gviz/tq?tqx=out:csv&gid=307229921';
 
 export const useSheetData = (refreshInterval = 30000) => {
     const [data, setData] = useState([]);
