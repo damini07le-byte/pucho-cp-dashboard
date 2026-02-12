@@ -3,7 +3,6 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import StatCards from './components/StatCards';
 import ActivityList from './components/ActivityList';
-import WorkflowMonitor from './components/WorkflowMonitor';
 import TaskQueue from './components/TaskQueue';
 import { OutcomeDistribution, HourlyActivity } from './components/Charts';
 import BrandDNADashboard from './components/BrandDNADashboard';
@@ -167,12 +166,6 @@ const CPDashboard = () => {
                             onTriggerCampaign={handleTriggerCampaign}
                             isCampaignRunning={isCampaignRunning}
                         />
-                    </div>
-                )}
-
-                {activeSection === 'Workflows' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <WorkflowMonitor />
                     </div>
                 )}
 

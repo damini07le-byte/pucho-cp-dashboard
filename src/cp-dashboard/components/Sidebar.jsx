@@ -56,19 +56,6 @@ const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
         },
         { name: 'Customers', icon: AgentsIcon, id: 'Customers' },
         {
-            name: 'Workflows',
-            id: 'Workflows',
-            customIcon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" cy="11" width="4" height="4" rx="1" />
-                    <rect x="17" cy="11" width="4" height="4" rx="1" />
-                    <rect x="10" cy="3" width="4" height="4" rx="1" />
-                    <rect x="10" cy="17" width="4" height="4" rx="1" />
-                    <path d="M7 13h3m4 0h3m-5-6v4m0 4v4" />
-                </svg>
-            )
-        },
-        {
             name: 'Tally Hub',
             id: 'TallyHub',
             customIcon: (
