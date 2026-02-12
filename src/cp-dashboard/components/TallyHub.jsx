@@ -33,7 +33,7 @@ const TallyHub = () => {
             action_type: type,        // 'call', 'whatsapp', or 'email'
             category: activeTab,      // 'UPGRADE', 'OWNER', or 'RENEWAL'
             customer_data: {
-                ...customer,          // Sending complete sheet data
+                ...customer,          // Sending complete sheet data including sheet_row_number
                 source: "Tally_Hub",
                 triggered_at: new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })
             }
