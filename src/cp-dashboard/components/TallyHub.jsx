@@ -146,7 +146,7 @@ const TallyHub = () => {
                 <AnimatePresence mode="popLayout">
                     {filteredData.map((customer, idx) => (
                         <motion.div
-                            key={customer['Serial Number'] || idx}
+                            key={customer.sheet_row_number}
                             layout
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}

@@ -214,7 +214,7 @@ const PendingDues = () => {
             <div className="space-y-4">
                 {transformedCustomers.map((customer) => (
                     <motion.div
-                        key={customer['Customer ID']}
+                        key={customer.sheet_row_number}
                         initial={false} // Disable entry animation on sync
                         animate={{ opacity: 1, y: 0 }}
                         whileHover={{ y: -2 }}
@@ -328,38 +328,16 @@ const PendingDues = () => {
                                         <ArrowUpRight size={16} className="text-blue-500" />
                                         Manual Interventions
                                     </h4>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-1">
                                         <button
                                             onClick={() => handleManualAction('call', selectedCustomer)}
                                             disabled={manualLoading}
-                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-red-200 hover:bg-red-50/30 transition-all group"
+                                            className="flex items-center justify-center gap-3 p-4 bg-red-600 text-white rounded-[24px] hover:bg-red-700 transition-all group shadow-lg shadow-red-200"
                                         >
-                                            <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-all shadow-sm">
+                                            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                                                 {manualLoading === 'call' ? <RefreshCw size={18} className="animate-spin" /> : <PhoneCall size={18} />}
                                             </div>
-                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Voice Call</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleManualAction('whatsapp', selectedCustomer)}
-                                            disabled={manualLoading}
-                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-green-200 hover:bg-green-50/30 transition-all group"
-                                        >
-                                            <div className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-all shadow-sm">
-                                                {manualLoading === 'whatsapp' ? <RefreshCw size={18} className="animate-spin" /> : <MessageSquare size={18} />}
-                                            </div>
-                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">WhatsApp</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleManualAction('email', selectedCustomer)}
-                                            disabled={manualLoading}
-                                            className="flex flex-col items-center gap-2 p-4 bg-white border border-gray-100 rounded-[24px] hover:border-blue-200 hover:bg-blue-50/30 transition-all group"
-                                        >
-                                            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm">
-                                                {manualLoading === 'email' ? <RefreshCw size={18} className="animate-spin" /> : <Mail size={18} />}
-                                            </div>
-                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Send Email</span>
+                                            <span className="text-sm font-black uppercase tracking-widest">Trigger Manual AI Voice Call</span>
                                         </button>
                                     </div>
                                 </div>
