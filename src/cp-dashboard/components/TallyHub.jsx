@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 
-// User defined Master URL for all tabs
+// Using the Master Sheet URL as requested by user
 const MASTER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=1744069029&single=true&output=csv';
 
 const TallyHub = () => {
@@ -21,6 +21,30 @@ const TallyHub = () => {
         { id: 'OWNER', name: 'Tally Business Owner', icon: <Users size={18} /> },
         { id: 'RENEWAL', name: 'License Renewal', icon: <Clock size={18} /> }
     ];
+
+    // Restore "proper" dynamic aging calculation
+    const getAging = (dateStr, sheetAging) => {
+        if (sheetAging && sheetAging !== 'N/A' && sheetAging !== '#REF!') return sheetAging;
+        if (!dateStr || dateStr === 'N/A') return 'N/A';
+        try {
+            let due;
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts[0].length === 4) due = new Date(parts[0], parts[1] - 1, parts[2]);
+                else due = new Date(parts[2], parts[1] - 1, parts[0]);
+            } else due = new Date(dateStr);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diff = Math.round((due - today) / 86400000);
+
+            if (diff === 0) return "Due Today";
+            if (diff < 0) return `${Math.abs(diff)} Days Past`;
+            return `${diff} Days Left`;
+        } catch (e) {
+            return dateStr;
+        }
+    };
 
     const handleAction = async (type, customer) => {
         const id = customer['Serial Number'] || customer['Row ID'] || 'N/A';
@@ -55,11 +79,11 @@ const TallyHub = () => {
 
     const transformedData = useMemo(() => {
         return (rawData || []).map(row => {
-            const name = row['Org Name'] || 'Unknown';
-            const id = row['Serial Number'] || 'N/A';
-            const email = row['Email ID'] || 'N/A';
-            const date = row['TSS Expiry Date'] || 'N/A';
-            const aging = row['Day Due'] || 'N/A';
+            const name = row['Org Name'] || row['Customer Name'] || 'Unknown';
+            const id = row['Serial Number'] || row['Customer ID'] || 'N/A';
+            const email = row['Email ID'] || row['Email'] || 'N/A';
+            const date = row['TSS Expiry Date'] || row['Due Date'] || 'N/A';
+            const sheetAging = row['Day Due'];
 
             // Map calling logs based on active tab
             let callingLog = '';
@@ -73,7 +97,7 @@ const TallyHub = () => {
                 _displayId: id,
                 _displayEmail: email,
                 _displayDate: date,
-                _aging: aging,
+                _aging: getAging(date, sheetAging),
                 _callingLog: callingLog
             };
         });
@@ -199,7 +223,7 @@ const TallyHub = () => {
                                             <span className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
                                                 {customer['Product'] || 'N/A'}
                                             </span>
-                                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+                                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${customer._aging.toLowerCase().includes('past') || customer._aging.toLowerCase().includes('due') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
                                                 {customer._aging}
                                             </span>
                                         </div>
@@ -298,7 +322,7 @@ const TallyHub = () => {
                                                 <PhoneCall className="text-gray-300" size={32} />
                                             </div>
                                             <h4 className="text-sm font-black text-[#1e293b] uppercase">No Activity Recorded</h4>
-                                            <p className="text-[11px] font-bold text-gray-400 mt-2">Checking column: {activeTab === 'UPGRADE' ? 'U-CALL' : activeTab === 'OWNER' ? 'O-CALL' : 'L-CALL'}</p>
+                                            <p className="text-[11px] font-bold text-gray-400 mt-2 px-10">We check the following sheet columns for data: U-CALL, O-CALL, or L-CALL depending on the active hub tab.</p>
                                         </div>
                                     )}
                                 </div>
