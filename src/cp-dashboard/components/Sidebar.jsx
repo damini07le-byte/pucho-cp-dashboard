@@ -69,6 +69,15 @@ const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
             )
         },
         {
+            name: 'Tally Hub',
+            id: 'TallyHub',
+            customIcon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v20" /><path d="m17 5-5-3-5 3" /><path d="m17 19-5 3-5-3" /><path d="M2 12h20" /><path d="m5 7-3 5 3 5" /><path d="m19 7 3 5-3 5" />
+                </svg>
+            )
+        },
+        {
             name: 'Reports',
             id: 'Reports',
             customIcon: (

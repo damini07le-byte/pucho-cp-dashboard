@@ -12,6 +12,8 @@ import StockPosition from './components/StockPosition';
 import PendingDues from './components/PendingDues';
 import { getInitialTasks, fetchTasksFromSheet, convertToCsvUrl } from './utils/dataService';
 
+import TallyHub from './components/TallyHub';
+
 const CPDashboard = () => {
     const [activeSection, setActiveSection] = useState('Overview');
     const [customers, setCustomers] = useState([]);
@@ -196,6 +198,12 @@ const CPDashboard = () => {
                 {activeSection === 'Dues' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <PendingDues />
+                    </div>
+                )}
+
+                {activeSection === 'TallyHub' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <TallyHub />
                     </div>
                 )}
 
