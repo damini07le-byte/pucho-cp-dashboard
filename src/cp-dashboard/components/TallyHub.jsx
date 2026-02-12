@@ -14,7 +14,7 @@ const TALLY_SHEETS = {
 
 const TallyHub = () => {
     const [activeTab, setActiveTab] = useState('UPGRADE');
-    const { data: rawData, loading, error, refetch } = useSheetData(30000, TALLY_SHEETS[activeTab]);
+    const { data: rawData, loading, error, lastUpdated, refetch } = useSheetData(10000, TALLY_SHEETS[activeTab]);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
 
@@ -94,23 +94,31 @@ const TallyHub = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search customer..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-2xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 w-[240px] transition-all"
-                        />
+                <div className="flex items-center gap-4">
+                    <div className="text-right">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Sync</p>
+                        <p className="text-[13px] font-black text-[#1e293b]">
+                            {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}
+                        </p>
                     </div>
-                    <button
-                        onClick={refetch}
-                        className="p-2.5 bg-white border border-black/5 rounded-2xl hover:bg-gray-50 transition-all text-[#1e293b]"
-                    >
-                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search customer..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-2xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 w-[240px] transition-all"
+                            />
+                        </div>
+                        <button
+                            onClick={refetch}
+                            className="p-2.5 bg-white border border-black/5 rounded-2xl hover:bg-gray-50 transition-all text-[#1e293b]"
+                        >
+                            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
