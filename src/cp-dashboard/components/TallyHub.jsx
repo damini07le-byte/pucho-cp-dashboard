@@ -85,6 +85,9 @@ const TallyHub = () => {
             const date = row['TSS Expiry Date'] || row['Due Date'] || 'N/A';
             const sheetAging = row['Day Due'];
 
+            const valStatus = row['Validation_Status'] || 'N/A';
+            const dnd = row['DND_Flag'] || 'No';
+
             // Map calling logs based on active tab
             let callingLog = '';
             if (activeTab === 'UPGRADE') callingLog = row['U-CALL'];
@@ -98,7 +101,9 @@ const TallyHub = () => {
                 _displayEmail: email,
                 _displayDate: date,
                 _aging: getAging(date, sheetAging),
-                _callingLog: callingLog
+                _callingLog: callingLog,
+                _valStatus: valStatus,
+                _dnd: dnd
             };
         });
     }, [rawData, activeTab]);
@@ -220,12 +225,26 @@ const TallyHub = () => {
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-1">
-                                            <span className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
-                                                {customer['Product'] || 'N/A'}
-                                            </span>
-                                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${customer._aging.toLowerCase().includes('past') || customer._aging.toLowerCase().includes('due') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                            <div className="flex items-center gap-1.5">
+                                                {customer._valStatus === 'FAILED' ? (
+                                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 rounded-full text-[8px] font-black border border-red-100 flex items-center gap-1" title={customer['Error_Reason']}>
+                                                        <X size={10} /> INVALID
+                                                    </span>
+                                                ) : customer._valStatus === 'PASSED' ? (
+                                                    <span className="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[8px] font-black border border-green-100 flex items-center gap-1">
+                                                        <ShieldCheck size={10} /> VERIFIED
+                                                    </span>
+                                                ) : null}
+                                                <span className="px-2.5 py-1 bg-gray-50 rounded-full border border-black/5 text-[9px] font-black text-gray-500 uppercase">
+                                                    {customer['Product'] || 'N/A'}
+                                                </span>
+                                            </div>
+                                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${customer._aging.toLowerCase().includes('past') || customer._aging.toLowerCase().includes('due') ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}`}>
                                                 {customer._aging}
                                             </span>
+                                            {customer._dnd === 'Yes' && (
+                                                <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter">DND Active</span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -247,10 +266,10 @@ const TallyHub = () => {
                                     <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                                         <button
                                             onClick={() => handleAction('call', customer)}
-                                            disabled={actionLoading}
+                                            disabled={actionLoading || customer._dnd === 'Yes'}
                                             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition-all font-black text-[11px] uppercase tracking-widest shadow-lg shadow-blue-200 active:scale-95 disabled:opacity-50"
                                         >
-                                            <PhoneCall size={16} fill="white" /> CALL AI AGENT
+                                            <PhoneCall size={16} fill="white" /> {customer._dnd === 'Yes' ? 'DND BLOCKED' : 'CALL AI AGENT'}
                                         </button>
                                     </div>
 
@@ -259,7 +278,7 @@ const TallyHub = () => {
                                             Actions Log: {parseLogs(customer._callingLog).length}
                                         </p>
                                         <div className="flex items-center gap-1">
-                                            <span className="text-[9px] font-black text-blue-500 uppercase">View History</span>
+                                            <span className="text-[9px] font-black text-blue-500 uppercase">{customer._valStatus === 'FAILED' ? 'Check Error' : 'View History'}</span>
                                             <Info size={12} className="text-blue-500" />
                                         </div>
                                     </div>
