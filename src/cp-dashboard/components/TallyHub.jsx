@@ -26,19 +26,17 @@ const TallyHub = () => {
 
     const handleAction = async (type, customer) => {
         setActionLoading(`${type}-${customer['Customer ID']}`);
-        const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz';
+        // Unified Webhook for all Tally Hub actions
+        const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/66x93VhoK1DTe9ZlJflZs';
 
         const payload = {
-            action_type: type,
+            action_type: type,        // 'call', 'whatsapp', or 'email'
+            category: activeTab,      // 'UPGRADE', 'OWNER', or 'RENEWAL'
             customer_data: {
-                id: customer['Customer ID'] || customer['id'],
-                name: customer['Customer Name'] || customer['name'],
-                mobile: customer['Mobile'] || customer['mobile'],
-                email: customer['Email'] || customer['email'],
-                category: activeTab,
-                triggered_at: new Date().toISOString()
-            },
-            source: "Tally_Hub"
+                ...customer,          // Sending complete sheet data
+                source: "Tally_Hub",
+                triggered_at: new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })
+            }
         };
 
         try {
@@ -75,8 +73,8 @@ const TallyHub = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-[20px] text-[13px] font-black transition-all ${activeTab === tab.id
-                                ? 'bg-[#1e293b] text-white shadow-lg'
-                                : 'text-[#1e293b]/60 hover:bg-white hover:text-[#1e293b]'
+                            ? 'bg-[#1e293b] text-white shadow-lg'
+                            : 'text-[#1e293b]/60 hover:bg-white hover:text-[#1e293b]'
                             }`}
                     >
                         {tab.icon}
