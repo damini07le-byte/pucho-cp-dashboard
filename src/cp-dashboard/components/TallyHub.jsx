@@ -7,9 +7,9 @@ import {
 import { useSheetData } from '../hooks/useSheetData';
 
 const TALLY_SHEETS = {
-    'UPGRADE': 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/export?format=csv&gid=0',
-    'OWNER': 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/export?format=csv&gid=113319197',
-    'RENEWAL': 'https://docs.google.com/spreadsheets/d/1pY9WtCSu6_A3YsZ31MgcbWj3Q2Ea8AO33Ztr8MVedAg/export?format=csv&gid=307229921'
+    'UPGRADE': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=0',
+    'OWNER': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=113319197',
+    'RENEWAL': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv&gid=307229921'
 };
 
 const TallyHub = () => {
