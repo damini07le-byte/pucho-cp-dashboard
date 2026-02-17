@@ -189,9 +189,22 @@ const LicenseRenewal = () => {
                                 <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 group-hover:bg-blue-600 transition-all duration-300"><User size={26} className="text-gray-400 group-hover:text-white" /></div>
                                 <div className="space-y-1">
                                     <h3 className="text-base font-black text-[#1e293b] group-hover:text-blue-700">{customer['Org Name']}</h3>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-wrap gap-2">
                                         <span className="text-[10px] bg-gray-50 px-2 py-0.5 rounded border font-bold text-gray-400">SN: {customer['Serial Number']}</span>
                                         <span className="text-[10px] bg-purple-50 px-2 py-0.5 rounded border border-purple-100 font-bold text-purple-600 uppercase tracking-tighter">{customer['Product']}</span>
+                                        {(customer['Mobile'] || customer['Mobile Number']) && (
+                                            <span className="text-[10px] bg-green-50 px-2 py-0.5 rounded border border-green-100 font-bold text-green-600 flex items-center gap-1">
+                                                <PhoneCall size={10} /> {customer['Mobile'] || customer['Mobile Number']}
+                                            </span>
+                                        )}
+                                        {(customer['Email'] || customer['Email ID']) && (
+                                            <span className="text-[10px] bg-blue-50 px-2 py-0.5 rounded border border-blue-100 font-bold text-blue-600 flex items-center gap-1">
+                                                <Mail size={10} /> {customer['Email'] || customer['Email ID']}
+                                            </span>
+                                        )}
+                                        <span className="text-[10px] bg-amber-50 px-2 py-0.5 rounded border border-amber-100 font-bold text-amber-600 flex items-center gap-1">
+                                            <Calendar size={10} /> {customer['Expiry Date to Type'] || customer['Expiry Date']}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -211,7 +224,25 @@ const LicenseRenewal = () => {
                                     <div className="w-16 h-16 rounded-[24px] bg-white/10 flex items-center justify-center border border-white/20"><User size={32} /></div>
                                     <div>
                                         <h3 className="text-2xl font-black uppercase leading-tight">{selectedCustomer['Org Name']}</h3>
-                                        <div className="flex gap-3 mt-1.5 font-black uppercase text-[10px] tracking-widest opacity-60"><span>SN: {selectedCustomer['Serial Number']}</span><span className="w-1 h-1 bg-white rounded-full mt-1.5 opacity-30" /><span>{selectedCustomer['Product']}</span></div>
+                                        <div className="flex flex-wrap gap-3 mt-1.5 font-black uppercase text-[10px] tracking-widest opacity-60">
+                                            <span>SN: {selectedCustomer['Serial Number']}</span>
+                                            <span className="w-1 h-1 bg-white rounded-full mt-1.5 opacity-30" />
+                                            <span>{selectedCustomer['Product']}</span>
+                                            {(selectedCustomer['Mobile'] || selectedCustomer['Mobile Number']) && (
+                                                <>
+                                                    <span className="w-1 h-1 bg-white rounded-full mt-1.5 opacity-30" />
+                                                    <span className="flex items-center gap-1"><PhoneCall size={10} /> {selectedCustomer['Mobile'] || selectedCustomer['Mobile Number']}</span>
+                                                </>
+                                            )}
+                                            {(selectedCustomer['Email'] || selectedCustomer['Email ID']) && (
+                                                <>
+                                                    <span className="w-1 h-1 bg-white rounded-full mt-1.5 opacity-30" />
+                                                    <span className="flex items-center gap-1"><Mail size={10} /> {selectedCustomer['Email'] || selectedCustomer['Email ID']}</span>
+                                                </>
+                                            )}
+                                            <span className="w-1 h-1 bg-white rounded-full mt-1.5 opacity-30" />
+                                            <span className="flex items-center gap-1 text-amber-400"><Calendar size={10} /> {selectedCustomer['Expiry Date to Type'] || selectedCustomer['Expiry Date']} ({calculateDays(selectedCustomer['Expiry Date to Type'] || selectedCustomer['Expiry Date'])} Days Left)</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <button onClick={() => setSelectedCustomer(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
