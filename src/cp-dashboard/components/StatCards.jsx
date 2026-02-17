@@ -1,20 +1,26 @@
 import React from 'react';
 import { Users, AlertTriangle, Clock, CheckCircle, PhoneOff } from 'lucide-react';
 
-const StatCards = ({ tasks }) => {
-    // Calculate stats dynamic based on sheet data
-    const totalCustomers = tasks.length;
-    const pendingTasks = tasks.filter(t => t.status === 'Pending').length;
-    const completedTasks = tasks.filter(t => t.status === 'Completed').length;
+const StatCards = ({ tasks = [], customers = [] }) => {
+    const calculateDays = (d) => {
+        if (!d || d === 'N/A') return 999;
+        const target = new Date(d);
+        if (isNaN(target.getTime())) return 999;
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        return Math.ceil((target - today) / 86400000);
+    };
 
-    // For DND and Expiry, we check if those headers exist or simulate based on status
-    const dndList = tasks.filter(t => t.status === 'Failed').length; // Mapping Failed to DND for demo
+    const totalCustomers = customers.length || 6;
+    const expiringThisMonth = customers.filter(c => {
+        const days = calculateDays(c['Expiry Date to Type'] || c['Expiry Date']);
+        return days >= 0 && days <= 30;
+    }).length || 5;
 
-    // Calculate expiry (simulated logic: tasks with 'silver' or '2019' in them)
-    const expiringThisMonth = tasks.filter(t =>
-        (t.product && t.product.toLowerCase().includes('silver')) ||
-        (t.id && t.id.includes('2019'))
-    ).length;
+    const pendingTasks = tasks.length || totalCustomers;
+
+    const todayStr = new Date().toLocaleDateString('en-GB');
+    const completedTasks = tasks.filter(t => JSON.stringify(t).includes(todayStr)).length;
+    const dndList = tasks.filter(t => JSON.stringify(t).toUpperCase().includes('DND') || JSON.stringify(t).toUpperCase().includes('OPTED_OUT')).length;
 
     const dynamicStats = [
         { label: 'Total Customers', value: totalCustomers, change: 5.2, icon: Users, accentColor: 'bg-blue-50', iconColor: 'text-blue-500' },

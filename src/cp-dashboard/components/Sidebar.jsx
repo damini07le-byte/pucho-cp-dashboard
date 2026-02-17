@@ -12,7 +12,6 @@ import LogoutIcon from '../../assets/icons/logout.svg';
 const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
     const menuItems = [
         { name: 'Overview', icon: HomeIcon, id: 'Overview' },
-        { name: 'Tasks', icon: ActivityIcon, id: 'Tasks' },
         {
             name: 'Daily Ledger',
             id: 'Ledger',
@@ -54,23 +53,13 @@ const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
                 </svg>
             )
         },
-        { name: 'Customers', icon: AgentsIcon, id: 'Customers' },
+        { name: 'License Renewal', icon: AgentsIcon, id: 'Customers' },
         {
             name: 'Tally Hub',
             id: 'TallyHub',
             customIcon: (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2v20" /><path d="m17 5-5-3-5 3" /><path d="m17 19-5 3-5-3" /><path d="M2 12h20" /><path d="m5 7-3 5 3 5" /><path d="m19 7 3 5-3 5" />
-                </svg>
-            )
-        },
-        {
-            name: 'Reports',
-            id: 'Reports',
-            customIcon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
                 </svg>
             )
         },

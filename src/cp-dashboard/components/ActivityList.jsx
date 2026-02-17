@@ -1,12 +1,24 @@
 import React from 'react';
 import { Mail, MessageCircle, Phone, ThumbsUp } from 'lucide-react';
 
-const ActivityList = ({ tasks }) => {
-    // Calculate activity based on completed tasks for each channel
-    const emailCount = tasks.filter(t => t.channel === 'Email' && t.status === 'Done').length;
-    const whatsappCount = tasks.filter(t => t.channel === 'WhatsApp' && t.status === 'Done').length;
-    const voiceCount = tasks.filter(t => t.channel === 'Voice' && t.status === 'Done').length;
-    const successCount = tasks.filter(t => t.status === 'Done').length;
+const ActivityList = ({ tasks = [] }) => {
+    // Calculate activity based on today's logs in the sheet
+    const todayStr = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY
+
+    let emailCount = 0;
+    let whatsappCount = 0;
+    let voiceCount = 0;
+
+    tasks.forEach(t => {
+        const rowStr = JSON.stringify(t);
+        if (rowStr.includes(todayStr)) {
+            if (rowStr.includes('WHATSAPP')) whatsappCount++;
+            if (rowStr.includes('EMAIL') || rowStr.includes('MAIL')) emailCount++;
+            if (rowStr.includes('VOICE') || rowStr.includes('CALL') || rowStr.includes('CHAT_LOG')) voiceCount++;
+        }
+    });
+
+    const successCount = whatsappCount + emailCount + voiceCount;
 
     const dynamicActivity = [
         { label: 'Emails Sent', value: emailCount, icon: Mail, color: 'bg-blue-50 text-blue-500' },

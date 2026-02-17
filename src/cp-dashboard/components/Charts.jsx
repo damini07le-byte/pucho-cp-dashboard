@@ -23,19 +23,28 @@ const hourlyActivity = [
     { hour: '7PM', tasks: 45 },
 ];
 
-export const OutcomeDistribution = ({ tasks }) => {
-    // Dynamically calculate outcomes based on current task statuses
-    const counts = tasks.reduce((acc, task) => {
-        const s = task.status || 'Pending';
-        acc[s] = (acc[s] || 0) + 1;
+export const OutcomeDistribution = ({ tasks = [] }) => {
+    // Dynamically calculate outcomes based on current log states
+    const breakdown = tasks.reduce((acc, task) => {
+        const rowStr = JSON.stringify(task).toUpperCase();
+
+        if (rowStr.includes('PAID') || rowStr.includes('COMPLETED') || rowStr.includes('SUCCESS')) {
+            acc['Completed'] = (acc['Completed'] || 0) + 1;
+        } else if (task.OVERDUE || rowStr.includes('OVERDUE') || rowStr.includes('EXPIRED')) {
+            acc['Failed'] = (acc['Failed'] || 0) + 1;
+        } else if (task.COMBO || task.FOLLOW_UP || task.VOICE_CALL || task.ESCALATION) {
+            acc['In Progress'] = (acc['In Progress'] || 0) + 1;
+        } else {
+            acc['Pending'] = (acc['Pending'] || 0) + 1;
+        }
         return acc;
-    }, {});
+    }, { 'Completed': 0, 'In Progress': 0, 'Pending': 0, 'Failed': 0 });
 
     const dynamicOutcomeBreakdown = [
-        { name: 'Completed', value: counts['Completed'] || 0, color: '#3B82F6' },
-        { name: 'In Progress', value: counts['In Progress'] || 0, color: '#60A5FA' },
-        { name: 'Pending', value: counts['Pending'] || 0, color: '#F59E0B' },
-        { name: 'Failed', value: counts['Failed'] || 0, color: '#EF4444' },
+        { name: 'Completed', value: breakdown['Completed'], color: '#3B82F6' },
+        { name: 'In Progress', value: breakdown['In Progress'], color: '#60A5FA' },
+        { name: 'Pending', value: breakdown['Pending'], color: '#F59E0B' },
+        { name: 'Failed', value: breakdown['Failed'], color: '#EF4444' },
     ];
 
     const total = dynamicOutcomeBreakdown.reduce((a, b) => a + b.value, 0);

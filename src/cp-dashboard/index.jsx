@@ -12,6 +12,7 @@ import PendingDues from './components/PendingDues';
 import { getInitialTasks, fetchTasksFromSheet, convertToCsvUrl } from './utils/dataService';
 
 import TallyHub from './components/TallyHub';
+import LicenseRenewal from './components/LicenseRenewal';
 
 const CPDashboard = () => {
     const [activeSection, setActiveSection] = useState('Overview');
@@ -21,8 +22,8 @@ const CPDashboard = () => {
     const [isCampaignRunning, setIsCampaignRunning] = useState(false);
 
     // Default URLs (Published CSVs for Netlify compatibility)
-    const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=0&single=true&output=csv';
-    const TASK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=113319197&single=true&output=csv';
+    const CUSTOMER_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?output=csv';
+    const TASK_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJn480F_uTcZeXSQBSAh1A1tKpnAjk_9RNS31SdlK4PCfTyL6LFaRbPvCXCzqwh8v-m5DwKxZzGAzF/pub?gid=693626076&single=true&output=csv';
 
     const [sheetUrl, setSheetUrl] = useState(localStorage.getItem('pucho_sheet_url') || TASK_SHEET_URL);
     const [searchTerm, setSearchTerm] = useState('');
@@ -136,7 +137,7 @@ const CPDashboard = () => {
                 {/* Primary Stats Dashboard */}
                 {activeSection === 'Overview' && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <StatCards tasks={tasks} />
+                        <StatCards tasks={tasks} customers={customers} />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                             <OutcomeDistribution tasks={tasks} />
@@ -145,36 +146,15 @@ const CPDashboard = () => {
                     </div>
                 )}
 
-                {activeSection === 'Tasks' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <TaskQueue
-                            tasks={getFilteredData(tasks)}
-                            onUpdateStatus={handleUpdateTaskStatus}
-                            onTriggerCampaign={handleTriggerCampaign}
-                            isCampaignRunning={isCampaignRunning}
-                            view="tasks"
-                        />
-                    </div>
-                )}
+
 
                 {activeSection === 'Customers' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <TaskQueue
-                            tasks={getFilteredData(customers)}
-                            onUpdateStatus={handleUpdateTaskStatus}
-                            view="customers"
-                            onTriggerCampaign={handleTriggerCampaign}
-                            isCampaignRunning={isCampaignRunning}
-                        />
+                        <LicenseRenewal />
                     </div>
                 )}
 
-                {activeSection === 'Reports' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <OutcomeDistribution tasks={tasks} />
-                        <ActivityList tasks={tasks} />
-                    </div>
-                )}
+
 
                 {activeSection === 'Ledger' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
