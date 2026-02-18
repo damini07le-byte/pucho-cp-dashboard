@@ -14,7 +14,7 @@ const PendingDues = () => {
 
     const handleManualAction = async (actionType, customer) => {
         setManualLoading(actionType);
-        const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n';
+        const webhookUrl = 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync';
 
         // Get the absolute latest data from the sheet sync state
         const latestInfo = data.find(row => row['Customer ID'] === customer['Customer ID']) || customer;
