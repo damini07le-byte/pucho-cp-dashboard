@@ -4,14 +4,14 @@
  */
 
 const FLOW_CONFIG = {
-    'call': { id: 'WF-VOICE', name: 'AI Voice Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz/sync' },
-    'whatsapp': { id: 'WF-WA', name: 'WhatsApp Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz/sync' },
-    'email': { id: 'WF-MAIL', name: 'Email Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz/sync' },
-    'bulk': { id: 'WF-BULK', name: 'Bulk Master Flow', webhook: 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz/sync' }
+    'call': { id: 'WF-VOICE', name: 'AI Voice Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync' },
+    'whatsapp': { id: 'WF-WA', name: 'WhatsApp Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync' },
+    'email': { id: 'WF-MAIL', name: 'Email Recovery', webhook: 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync' },
+    'bulk': { id: 'WF-BULK', name: 'Bulk Master Flow', webhook: 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync' }
 };
 
 export const triggerAgentFlow = async (type, flowId, context = {}) => {
-    const config = FLOW_CONFIG[type] || { id: flowId, name: 'Custom Flow', webhook: 'https://studio.pucho.ai/api/v1/webhooks/w5Ny98y5m9L0gYk0wvbXz/sync' };
+    const config = FLOW_CONFIG[type] || { id: flowId, name: 'Custom Flow', webhook: 'https://studio.pucho.ai/api/v1/webhooks/pROCUKYVfDKyze4Ex8E6n/sync' };
 
     console.group(`[🚀 WEBHOOK TRIGGERED] ${config.name}`);
     console.log(`Payload Data:`, context);
