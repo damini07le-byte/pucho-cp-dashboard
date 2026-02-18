@@ -4,7 +4,7 @@ import { Lightbulb, Palette, Image as ImageIcon, Upload, ChevronRight, Sparkles,
 // Webhook URLs - Update these from Pucho Studio for each flow
 // --- Pucho Studio Webhooks (Synchronous) ---
 // Note: /sync is required to get the return response body immediately.
-const IDEAS_WEBHOOK = "https://studio.pucho.ai/api/v1/webhooks/6UYa63HjtO1gdN00bfSAH/sync";
+const IDEAS_WEBHOOK = "https://studio.pucho.ai/api/v1/webhooks/kjthA4kaBuUNkL6ma2YTi/sync";
 const LAB_WEBHOOK = "https://studio.pucho.ai/api/v1/webhooks/QaKggyfSvb8ErEVSnYHQH/sync"; // Concept Lab
 const CUSTOM_WEBHOOK = "https://studio.pucho.ai/api/v1/webhooks/WyQ1drLKJn5zEJFXicuOe/sync"; // Creative Studio
 
