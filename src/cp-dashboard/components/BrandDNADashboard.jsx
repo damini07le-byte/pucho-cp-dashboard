@@ -775,7 +775,11 @@ const ConceptLabView = ({ brandDNA, selectedIdea, onDownload, extractImages, onL
 
             const response = await fetch(LAB_WEBHOOK, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
                 body: JSON.stringify(payload),
                 signal: controller.signal
             });
