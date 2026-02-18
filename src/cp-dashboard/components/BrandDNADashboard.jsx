@@ -183,6 +183,46 @@ const BrandDNADashboard = () => {
     );
 };
 
+// --- Brand Presets for Quick Testing ---
+const PRESET_BRANDS = [
+    {
+        name: 'LuxeBrew',
+        tagline: 'Artisanal Coffee for Connoisseurs',
+        url: 'https://luxebrew.coffee',
+        logo: 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=200&h=200&auto=format&fit=crop',
+        shortDescription: 'High-end specialty coffee roaster focusing on rare beans.',
+        longDescription: 'LuxeBrew is an artisanal coffee roaster dedicated to sourcing the world\'s finest and rarest single-origin beans. We provide a premium brewing experience for those who appreciate the subtle notes and complexity of world-class coffee.',
+        values: 'Quality, Sustainability, Craftsmanship',
+        aesthetics: 'Dark, Minimalistic, Elegant',
+        tone: 'Sophisticated, Professional, Passionate',
+        campaignContext: 'Targeting high-net-worth individuals in metropolitan areas who enjoy premium weekend experiences.'
+    },
+    {
+        name: 'EcoStride',
+        tagline: 'Walk the Talk on Sustainability',
+        url: 'https://ecostride.shoes',
+        logo: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=200&h=200&auto=format&fit=crop',
+        shortDescription: 'Eco-friendly footwear made from recycled ocean plastics.',
+        longDescription: 'EcoStride is a revolutionary shoe brand committed to cleaning our oceans. Every pair of sneakers we sell is crafted from 100% recycled marine plastic, offering unparalleled comfort without compromising our planet\'s health.',
+        values: 'Eco-Friendly, Innovation, Transparency',
+        aesthetics: 'Natural, Earthy, Modern',
+        tone: 'Inspiring, Friendly, Mission-driven',
+        campaignContext: 'Gen-Z and Millennials who are environmentally conscious and active on social media.'
+    },
+    {
+        name: 'TechNova',
+        tagline: 'Future-Proof Your Business',
+        url: 'https://technova.io',
+        logo: 'https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=200&h=200&auto=format&fit=crop',
+        shortDescription: 'Enterprise AI solutions for data-driven decision making.',
+        longDescription: 'TechNova provides state-of-the-art artificial intelligence platforms for Fortune 500 companies. Our proprietary algorithms help businesses predict market trends, optimize supply chains, and automate complex workflows with 99% accuracy.',
+        values: 'Precision, Scalability, Intelligence',
+        aesthetics: 'Clean, Tech-focused, Vibrant blue',
+        tone: 'Authoritative, Futuristic, Reliable',
+        campaignContext: 'CTOs and IT Directors looking to modernize their legacy systems with AI capabilities.'
+    }
+];
+
 // --- Step 1: Idea Strategy View ---
 const IdeaStrategyView = ({
     brandDNA,
@@ -482,6 +522,31 @@ const IdeaStrategyView = ({
                     </div>
 
                     <div className="space-y-8">
+                        {/* Section 0: Quick Selection */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                <Sparkles size={12} className="text-amber-500" />
+                                Quick Start Samples
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                                {PRESET_BRANDS.map((brand) => (
+                                    <button
+                                        key={brand.name}
+                                        onClick={() => setBrandDNA(brand)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${brandDNA.name === brand.name
+                                            ? 'bg-amber-50 border-amber-200 text-amber-600 shadow-sm'
+                                            : 'bg-white border-gray-100 text-gray-500 hover:border-amber-200 hover:bg-amber-50/30'
+                                            }`}
+                                    >
+                                        <div className="w-4 h-4 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                            <img src={brand.logo} alt="" className="w-full h-full object-cover" />
+                                        </div>
+                                        {brand.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Section 1: Core Identity */}
                         <div className="space-y-4">
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
