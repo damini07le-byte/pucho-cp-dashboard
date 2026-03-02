@@ -111,68 +111,76 @@ const Sidebar = ({ activeSection, setActiveSection, isOpen, onClose }) => {
             ]
         }
 
-        < nav className = "flex-1 px-4 py-4 space-y-6 overflow-y-auto custom-scrollbar" >
-        {
-            menuGroups.map((group, groupIdx) => (
-                <div key={groupIdx}>
-                    {group.group !== 'Main Menu' && (
-                        <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3 ml-1">
-                            {group.group}
-                        </h3>
-                    )}
-                    <div className="space-y-1.5">
-                        {group.items.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    setActiveSection(item.id);
-                                    if (window.innerWidth < 1024) onClose();
-                                }}
-                                className={`w-full flex items-center gap-[12px] px-[16px] h-[48px] rounded-[24px] text-[14px] font-bold transition-all border ${activeSection === item.id
-                                    ? 'bg-blue-50 border-transparent text-blue-600 shadow-sm'
-                                    : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
-                                    }`}
-                            >
-                                <div className={`transition-colors flex-shrink-0 ${activeSection === item.id ? 'text-blue-600' : 'text-gray-400'}`}>
-                                    {item.customIcon ? (
-                                        item.customIcon
-                                    ) : (
-                                        <img src={item.icon} alt={item.name} className={`w-5 h-5 ${activeSection === item.id ? 'brightness-0' : 'opacity-70'}`} />
-                                    )}
-                                </div>
-                                <span className="truncate">{item.name}</span>
-                            </button>
-                        ))}
+        return (
+        <aside className={`fixed lg:static top-0 left-0 h-full w-[260px] bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <div className="p-6 flex-shrink-0 flex items-center justify-between">
+                <img src={logo} alt="Pucho" className="h-[28px]" />
+                {isOpen && (
+                    <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-black">
+                        ✕
+                    </button>
+                )}
+            </div>
+
+            <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto custom-scrollbar">
+                {menuGroups.map((group, groupIdx) => (
+                    <div key={groupIdx}>
+                        {group.group !== 'Main Menu' && (
+                            <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3 ml-1">
+                                {group.group}
+                            </h3>
+                        )}
+                        <div className="space-y-1.5">
+                            {group.items.map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        setActiveSection(item.id);
+                                        if (window.innerWidth < 1024) onClose();
+                                    }}
+                                    className={`w-full flex items-center gap-[12px] px-[16px] h-[48px] rounded-[24px] text-[14px] font-bold transition-all border ${activeSection === item.id
+                                        ? 'bg-blue-50 border-transparent text-blue-600 shadow-sm'
+                                        : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
+                                        }`}
+                                >
+                                    <div className={`transition-colors flex-shrink-0 ${activeSection === item.id ? 'text-blue-600' : 'text-gray-400'}`}>
+                                        {item.customIcon ? (
+                                            item.customIcon
+                                        ) : (
+                                            <img src={item.icon} alt={item.name} className={`w-5 h-5 ${activeSection === item.id ? 'brightness-0' : 'opacity-70'}`} />
+                                        )}
+                                    </div>
+                                    <span className="truncate">{item.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </nav>
+
+            <div className="p-6 border-t border-gray-100 space-y-3">
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-3xl text-[15px] font-bold text-red-500 hover:bg-red-50 transition-all">
+                    <img src={LogoutIcon} alt="Logout" className="w-5 h-5 opacity-80" />
+                    <span>Log out</span>
+                </button>
+
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors border border-black/5">
+                    <div
+                        className="w-10 h-10 rounded-full bg-gray-100 border border-black/5 flex-shrink-0"
+                        style={{
+                            backgroundImage: `url(${avatarsGrid})`,
+                            backgroundSize: '900%',
+                            backgroundPosition: '37.5% 0%',
+                            backgroundRepeat: 'no-repeat'
+                        }}
+                    />
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[#111935] truncate">Admin User</p>
+                        <p className="text-xs text-gray-400 font-medium truncate">admin@pucho.ai</p>
                     </div>
                 </div>
-            ))
-        }
-                </nav >
-
-    <div className="p-6 border-t border-gray-100 space-y-3">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-3xl text-[15px] font-bold text-red-500 hover:bg-red-50 transition-all">
-            <img src={LogoutIcon} alt="Logout" className="w-5 h-5 opacity-80" />
-            <span>Log out</span>
-        </button>
-
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors border border-black/5">
-            <div
-                className="w-10 h-10 rounded-full bg-gray-100 border border-black/5 flex-shrink-0"
-                style={{
-                    backgroundImage: `url(${avatarsGrid})`,
-                    backgroundSize: '900%',
-                    backgroundPosition: '37.5% 0%',
-                    backgroundRepeat: 'no-repeat'
-                }}
-            />
-            <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-[#111935] truncate">Admin User</p>
-                <p className="text-xs text-gray-400 font-medium truncate">admin@pucho.ai</p>
             </div>
-        </div>
-    </div>
-            </aside >
-        </>
+        </aside>
     );
 };
 
