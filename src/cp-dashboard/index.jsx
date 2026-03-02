@@ -13,6 +13,10 @@ import { getInitialTasks, fetchTasksFromSheet, convertToCsvUrl } from './utils/d
 
 import TallyHub from './components/TallyHub';
 import LicenseRenewal from './components/LicenseRenewal';
+import Clients from './components/Clients';
+import WorkspaceSettings from './components/WorkspaceSettings';
+import UserManagement from './components/UserManagement';
+import Integrations from './components/Integrations';
 
 const CPDashboard = () => {
     const [activeSection, setActiveSection] = useState('Overview');
@@ -156,6 +160,11 @@ const CPDashboard = () => {
 
 
 
+                {activeSection === 'Clients' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <Clients />
+                    </div>
+                )}
                 {activeSection === 'Ledger' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <DailyLedger />
@@ -183,6 +192,23 @@ const CPDashboard = () => {
                 {activeSection === 'BrandDNA' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <BrandDNADashboard />
+                    </div>
+                )}
+                {activeSection === 'WorkspaceSettings' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <WorkspaceSettings />
+                    </div>
+                )}
+
+                {activeSection === 'UserManagement' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <UserManagement />
+                    </div>
+                )}
+
+                {activeSection === 'Integrations' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <Integrations />
                     </div>
                 )}
             </main>
